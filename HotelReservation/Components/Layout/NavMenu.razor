@@ -8,7 +8,25 @@
         <div><NavLink href="/"><div class="nav-item">Home</div></NavLink></div>
         <div><NavLink href="/about"><div class="nav-item">About us</div></NavLink></div>
         <div><NavLink href="/rooms"><div class="nav-item">Rooms</div></NavLink></div>
-        <div><NavLink href="/auth"><div class="nav-item">Authentication Required</div></NavLink></div>
+        <div><NavLink href="/auth"><div class="nav-item">Auth Required</div></NavLink></div>
+        <AuthorizeView>
+            <Authorized>
+                <div><NavLink href="/Account/Manage"><div class="nav-item">@context.User.Identity?.Name</div></NavLink></div>
+                <div>
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link">
+                            <div class="nav-item">Logout</div>
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div><NavLink href="/Account/Register"><div class="nav-item">Register</div></NavLink></div>
+                <div><NavLink href="/Account/Login"><div class="nav-item">Login</div></NavLink></div>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 </nav>
 
