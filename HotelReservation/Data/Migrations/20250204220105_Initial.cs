@@ -80,7 +80,8 @@ namespace HotelReservation.Migrations
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DoubleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    SingleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false)
+                    SingleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    NightlyPrice = table.Column<uint>(type: "int unsigned", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -1,18 +1,42 @@
 ﻿@page "/rooms"
+@rendermode InteractiveServer
+@using HotelReservation.Data
+@using System.Threading.Channels
 @inject NavigationManager NavManager
+@inject ApplicationDbContext DbContext;
 
 <h3>Rooms</h3>
 <br>
 
-<NavLink href="room_creator" Match="NavLinkMatch.All">
-    <button>create room</button>
-</NavLink>
-<br>
-
-<NavLink href="room" Match="NavLinkMatch.All">
-    <button>room</button>
-</NavLink>
+<div class="nav-links">
+    <button @onclick="()=>_createRoom = !_createRoom">create room</button>
+    @*     <NavLink href="room_creator" Match="NavLinkMatch.All">
+    </NavLink>
+    <NavLink href="room" Match="NavLinkMatch.All">
+        <button>room</button>
+    </NavLink>
+ *@    
+    @if (_createRoom)
+    {
+        <RoomTemplateComponent Template=@_newTemplate Mode="Create" OnSave="CreateRoomTemplateAsync" />
+    }
+</div>
 
 @code {
+    bool _createRoom = false;
+    private readonly Models.RoomTemplate _newTemplate = new Models.RoomTemplate() { DoubleBeds = 2, Name = "asd", NightlyPrice = 21, SingleBeds = 2 };
+    protected async void CreateRoomTemplateAsync(Models.RoomTemplate template)
+    {
+        await DbContext.RoomTemplates.AddAsync(template);
+        await DbContext.SaveChangesAsync();
+        _createRoom = false;
+    }
+    /// <summary>
+    /// create short overview of all templates, after that create edit button for them
+    /// </summary>
+    // private Task EditRoomTemplateAsync()
+    // {
+
+    // }
 
 }

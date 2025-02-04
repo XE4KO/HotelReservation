@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250204175323_Initial")]
+    [Migration("20250204220105_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -42,6 +42,9 @@ namespace HotelReservation.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<uint>("NightlyPrice")
+                        .HasColumnType("int unsigned");
 
                     b.Property<byte>("SingleBeds")
                         .HasColumnType("tinyint unsigned");

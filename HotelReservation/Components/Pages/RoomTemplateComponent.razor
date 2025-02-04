@@ -1,0 +1,37 @@
+﻿@page "/room_creator"
+@rendermode InteractiveServer
+
+@using HotelReservation.Data
+
+<h3>Create a room template</h3>
+<br />
+<form>
+    <label for="name">Name</label><br />
+    <input type="text" id="name" name="name" @bind-value="@Template.Name" required /><br />
+    <label for="dbeds">Double Beds</label><br />
+    <input type="number" id="dbeds" name="dbeds" @bind-value="@Template.DoubleBeds" required /><br />
+    <label for="sbeds">Single Beds</label><br />
+    <input type="number" id="sbeds" name="sbeds" @bind-value="@Template.SingleBeds" required /><br />
+    <label for="price">Price per Night</label><br />
+    <input type="number" id="price" name="price" @bind-value="@Template.NightlyPrice" required /><br />
+    <label for="desc">Description</label><br />
+    <input type="text" id="desc" name="desc" @bind-value="@Template.Description" /><br />
+    @if (Mode != null)
+    {
+        <input type="submit" @onclick="Save" id="submit" value=@Mode></input>
+    }
+    @* <button type="button" @onclick=@CreateRoomTemplateAsync id="create">Create</button> *@
+</form>
+
+@code {
+    [Parameter] public required Models.RoomTemplate Template { get; set; }
+    [Parameter] public required string? Mode { get; set; }
+    [Parameter] public EventCallback<Models.RoomTemplate> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    protected override void OnInitialized()
+    {
+    }
+    private Task Save(MouseEventArgs e)
+        => OnSave.InvokeAsync(Template);
+    // => OnCancel.InvokeAsync();
+}

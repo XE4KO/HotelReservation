@@ -15,7 +15,7 @@ namespace HotelReservation.Components.Models
         public required byte SingleBeds { get; set; }
         //public IEnumerable<RoomTemplateToTag> Tags;
 
-        public required uint NightlyPrice;
+        public required uint NightlyPrice { get; set; }
         //public IEnumerable<Room> Rooms;
     }
 }

@@ -40,6 +40,9 @@ namespace HotelReservation.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<uint>("NightlyPrice")
+                        .HasColumnType("int unsigned");
+
                     b.Property<byte>("SingleBeds")
                         .HasColumnType("tinyint unsigned");
 
