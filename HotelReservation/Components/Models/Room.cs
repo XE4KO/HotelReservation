@@ -1,14 +1,24 @@
-﻿namespace HotelReservation.Components.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace HotelReservation.Components.Models
 {
-    public record Room(byte DoubleBeds, byte SingleBeds, List<string> Tags)
+    public class Room
     {
+        [Key]
         public required uint Id;
-        public required int NightlyPrice;
-        public required string TypeOfRoom;
+
+        public required RoomTemplate Type;
+
+        public required uint Floor;
+
+        public required uint Number;
     }
 
-    record Single() : Room(1, 0, new List<string>() { "free Wifi", "coffee machine" });
-    record Double() : Room(1, 1, new List<string>() { "free Wifi", "coffee machine" });
-    record Triple() : Room(1, 2, new List<string>() { "free Wifi", "coffee machine" });
-    record Quad() : Room(2, 2, new List<string>() { "free Wifi", "coffee machine" });
+    /*
+     record Single() : RoomTemplate(1, 0,"free Wifi,coffee machine" );
+     record Double() : RoomTemplate(1, 1, "free Wifi,coffee machine" );
+     record Triple() : RoomTemplate(1, 2, "free Wifi,coffee machine");
+     record Quad() : RoomTemplate(2, 2, "free Wifi,coffee machine");*/
 }
