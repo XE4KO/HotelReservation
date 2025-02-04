@@ -18,10 +18,10 @@ namespace HotelReservation.Data
             }
         }*/
         public DbSet<RoomTemplate> RoomTemplates { get; set; }
-        public DbSet<Room> Rooms { get; set; }
-        public DbSet<Tag> Tags { get; set; }
-        public DbSet<RoomTemplateToTag> RoomTemplatesTags{ get; set; }
-        public DbSet<Reservation> Reservations { get; set; }
+        //public DbSet<Room> Rooms { get; set; }
+        //public DbSet<Tag> Tags { get; set; }
+        //public DbSet<RoomTemplateToTag> RoomTemplatesTags{ get; set; }
+        //public DbSet<Reservation> Reservations { get; set; }
 
     }
  

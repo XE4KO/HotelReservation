@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+--------------------------------------------------------------------------------------------------------------------using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelReservation.Components.Models
 {
     public class Reservation
     {
         [Key]
-        public required uint Id { get; set; }
+        public uint Id { get; set; }
 
         public required uint RoomId { get; set; }
 

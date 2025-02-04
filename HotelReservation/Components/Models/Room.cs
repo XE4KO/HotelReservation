@@ -1,13 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelReservation.Components.Models
 {
     public class Room
     {
         [Key]
-        public required uint Id;
+        public uint Id;
 
         public required RoomTemplate Type;
 

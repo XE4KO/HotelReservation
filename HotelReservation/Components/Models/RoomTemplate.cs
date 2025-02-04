@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelReservation.Components.Models
 {
     public class RoomTemplate
     {
         [Key]
-        public required uint Id { get; set; }
+        public int Id { get; set; }
         public required string Name { get; set; }
         public string? Description { get; set; }
 
