@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250204220105_Initial")]
+    [Migration("20250205120650_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

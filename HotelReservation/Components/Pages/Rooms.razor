@@ -1,7 +1,10 @@
 ﻿@page "/rooms"
 @rendermode InteractiveServer
+@using HotelReservation.Components.Models
 @using HotelReservation.Data
 @using System.Threading.Channels
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel
 @inject NavigationManager NavManager
 @inject ApplicationDbContext DbContext;
 
@@ -9,7 +12,7 @@
 <br>
 
 <div class="nav-links">
-    <button @onclick="()=>_createRoom = !_createRoom">create room</button>
+    <button @onclick="SwitchCreateRoomTemplate">create room</button>
     @*     <NavLink href="room_creator" Match="NavLinkMatch.All">
     </NavLink>
     <NavLink href="room" Match="NavLinkMatch.All">
@@ -18,25 +21,94 @@
  *@    
     @if (_createRoom)
     {
-        <RoomTemplateComponent Template=@_newTemplate Mode="Create" OnSave="CreateRoomTemplateAsync" />
+        <RoomTemplateComponent Template=@NewTemplate() Mode="Create" OnSave="AddRoomTemplateAsync" />
     }
+    @if (_roomTemplates == null)
+    {
+        <div>Loading...</div>
+    }
+    else
+    {
+        <div>
+            @foreach (RoomTemplate template in _roomTemplates)
+            {
+                <RoomTemplateOverview Template=template>
+                    <button @onclick=@(() => EditTemplate(template))>&#x270E;</button>
+                    <button @onclick=@(() => DeleteTemplateAsync(template))>&#x2716;</button>
+                </RoomTemplateOverview>
+                if (template == _editTemplate)
+                {
+                    <RoomTemplateComponent Template=@template Mode="Save" OnSave="UpdateRoomTemplateAsync" />
+                }
+            }
+        </div>
+    }
+
+
 </div>
 
 @code {
+    private bool _isFirstRender = true;
     bool _createRoom = false;
-    private readonly Models.RoomTemplate _newTemplate = new Models.RoomTemplate() { DoubleBeds = 2, Name = "asd", NightlyPrice = 21, SingleBeds = 2 };
-    protected async void CreateRoomTemplateAsync(Models.RoomTemplate template)
+    bool _viewRooms = false;
+    RoomTemplate? _editTemplate;
+    List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
+    private RoomTemplate NewTemplate() => new Models.RoomTemplate() { DoubleBeds = 0, Name = "New_template", NightlyPrice = 0, SingleBeds = 0 };
+    protected override async void OnInitialized()
+    {
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RefreshTemplates();
+            StateHasChanged();
+        }
+        await base.OnInitializedAsync();
+    }
+    async Task RefreshTemplates()
+        => _roomTemplates = await GetAllRoomTemplatesAsync();
+    
+    protected void SwitchCreateRoomTemplate()
+    {
+        _createRoom = !_createRoom;
+        _editTemplate = null;
+    }
+    protected async Task AddRoomTemplateAsync(Models.RoomTemplate template)
     {
         await DbContext.RoomTemplates.AddAsync(template);
         await DbContext.SaveChangesAsync();
+        // _roomTemplates.Add(template);
+        // StateHasChanged();
+        await RefreshTemplates();
         _createRoom = false;
     }
-    /// <summary>
-    /// create short overview of all templates, after that create edit button for them
-    /// </summary>
-    // private Task EditRoomTemplateAsync()
-    // {
+    protected Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
+        => DbContext.RoomTemplates.ToListAsync();
 
-    // }
-
+    private void EditTemplate(RoomTemplate template)
+    {
+        if (_editTemplate == template)
+        {
+            _editTemplate = null;
+        }else{
+            _editTemplate = template;
+        }
+        _createRoom = false;
+    }
+    private async Task DeleteTemplateAsync(RoomTemplate template)
+    {
+        DbContext.RoomTemplates.Remove(template);
+        await DbContext.SaveChangesAsync();
+        _roomTemplates.Remove(template);
+        StateHasChanged();
+    }
+    protected async Task UpdateRoomTemplateAsync(Models.RoomTemplate template)
+    {
+        DbContext.RoomTemplates.Update(template);
+        await DbContext.SaveChangesAsync();
+        _editTemplate = null;
+        StateHasChanged();
+        _createRoom = false;
+    }
 }

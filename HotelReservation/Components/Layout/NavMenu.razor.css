@@ -13,6 +13,8 @@
 	 .nav-item {
 		text-decoration: none;
 		color: #fff;
+		background-color: #303030;
+		border-style: none;
 		font-size: 18px;
 		padding: 10px 15px;
 		transition: background-color 0.3s ease, color 0.3s ease;

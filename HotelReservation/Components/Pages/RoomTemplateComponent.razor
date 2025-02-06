@@ -3,22 +3,30 @@
 
 @using HotelReservation.Data
 
-<h3>Create a room template</h3>
-<br />
 <form>
-    <label for="name">Name</label><br />
-    <input type="text" id="name" name="name" @bind-value="@Template.Name" required /><br />
-    <label for="dbeds">Double Beds</label><br />
-    <input type="number" id="dbeds" name="dbeds" @bind-value="@Template.DoubleBeds" required /><br />
-    <label for="sbeds">Single Beds</label><br />
-    <input type="number" id="sbeds" name="sbeds" @bind-value="@Template.SingleBeds" required /><br />
-    <label for="price">Price per Night</label><br />
-    <input type="number" id="price" name="price" @bind-value="@Template.NightlyPrice" required /><br />
-    <label for="desc">Description</label><br />
-    <input type="text" id="desc" name="desc" @bind-value="@Template.Description" /><br />
+    <div>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" @bind-value="@Template.Name" required />
+    </div>
+    <div>
+        <label for="dbeds">Double Beds</label>
+        <input type="number" id="dbeds" name="dbeds" @bind-value="@Template.DoubleBeds" required />
+    </div>
+    <div>
+        <label for="sbeds">Single Beds</label>
+        <input type="number" id="sbeds" name="sbeds" @bind-value="@Template.SingleBeds" required />
+    </div>
+    <div>
+        <label for="price">Price per Night</label>
+        <input type="number" id="price" name="price" @bind-value="@Template.NightlyPrice" required />
+    </div>
+    <div>
+        <label for="desc">Description</label>
+        <input type="text" id="desc" name="desc" @bind-value="@Template.Description" />
+    </div>
     @if (Mode != null)
     {
-        <input type="submit" @onclick="Save" id="submit" value=@Mode></input>
+        <input type="button" @onclick="Save" id="submit" value=@Mode></input>
     }
     @* <button type="button" @onclick=@CreateRoomTemplateAsync id="create">Create</button> *@
 </form>
@@ -31,7 +39,9 @@
     protected override void OnInitialized()
     {
     }
-    private Task Save(MouseEventArgs e)
-        => OnSave.InvokeAsync(Template);
+    private async Task Save(MouseEventArgs e)
+    {
+        await OnSave.InvokeAsync(Template);
+    }
     // => OnCancel.InvokeAsync();
 }

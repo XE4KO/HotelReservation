@@ -77,11 +77,11 @@ namespace HotelReservation.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     DoubleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     SingleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    NightlyPrice = table.Column<uint>(type: "int unsigned", nullable: false)
+                    NightlyPrice = table.Column<uint>(type: "int unsigned", nullable: false),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {

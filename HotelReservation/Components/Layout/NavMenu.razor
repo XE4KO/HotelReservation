@@ -5,28 +5,26 @@
 <nav>
     <a href="/" class="logo">Hotel_reservation</a>
     <div class="nav-links">
-        <div><NavLink href="/"><div class="nav-item">Home</div></NavLink></div>
-        <div><NavLink href="/about"><div class="nav-item">About us</div></NavLink></div>
-        <div><NavLink href="/rooms"><div class="nav-item">Rooms</div></NavLink></div>
-        <div><NavLink href="/auth"><div class="nav-item">Auth Required</div></NavLink></div>
+        <div><NavLink href="/"><button class="nav-item">Home</button></NavLink></div>
+        <div><NavLink href="/rooms"><button class="nav-item">Rooms</button></NavLink></div>
+        <div><NavLink href="/auth"><button class="nav-item">Auth Required</button></NavLink></div>
         <AuthorizeView>
             <Authorized>
-                <div><NavLink href="/Account/Manage"><div class="nav-item">@context.User.Identity?.Name</div></NavLink></div>
+                <div><NavLink href="/Account/Manage"><button class="nav-item">@context.User.Identity?.Name</button></NavLink></div>
                 <div>
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <div class="nav-item">Logout</div>
-                        </button>
+                        <button type="submit" class="nav-item">Logout</button>
                     </form>
                 </div>
             </Authorized>
             <NotAuthorized>
-                <div><NavLink href="/Account/Register"><div class="nav-item">Register</div></NavLink></div>
-                <div><NavLink href="/Account/Login"><div class="nav-item">Login</div></NavLink></div>
+                <div><NavLink href="/Account/Register"><button class="nav-item">Register</button></NavLink></div>
+                <div><NavLink href="/Account/Login"><button class="nav-item">Login</button></NavLink></div>
             </NotAuthorized>
         </AuthorizeView>
+        <div><NavLink href="/about"><button class="nav-item">About us</button></NavLink></div>
     </div>
 </nav>
 
