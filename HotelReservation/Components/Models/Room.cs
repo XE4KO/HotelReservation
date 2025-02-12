@@ -15,11 +15,8 @@ namespace HotelReservation.Components.Models
         public required uint Floor;
 
         public required uint Number;
+
+        public required string Availability;
     }
 
-    /*
-     record Single() : RoomTemplate(1, 0,"free Wifi,coffee machine" );
-     record Double() : RoomTemplate(1, 1, "free Wifi,coffee machine" );
-     record Triple() : RoomTemplate(1, 2, "free Wifi,coffee machine");
-     record Quad() : RoomTemplate(2, 2, "free Wifi,coffee machine");*/
 }
