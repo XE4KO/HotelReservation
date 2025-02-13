@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250206175621_Initial")]
+    [Migration("20250213162430_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,30 @@ namespace HotelReservation.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Floor")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TypeId");
+
+                    b.ToTable("Rooms");
+                });
 
             modelBuilder.Entity("HotelReservation.Components.Models.RoomTemplate", b =>
                 {
@@ -43,8 +67,8 @@ namespace HotelReservation.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<uint>("NightlyPrice")
-                        .HasColumnType("int unsigned");
+                    b.Property<int>("NightlyPrice")
+                        .HasColumnType("int");
 
                     b.Property<byte>("SingleBeds")
                         .HasColumnType("tinyint unsigned");
@@ -248,6 +272,17 @@ namespace HotelReservation.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
+                {
+                    b.HasOne("HotelReservation.Components.Models.RoomTemplate", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

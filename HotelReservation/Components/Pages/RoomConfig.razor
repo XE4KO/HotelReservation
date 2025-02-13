@@ -1,10 +1,43 @@
 ﻿@page "/room-config"
+@using HotelReservation.Components.Models
+@using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@inject ApplicationDbContext DbContext;
 
+<button @onclick="() => _createRoom=!_createRoom">Create Room</button>
 
-<NavLink href="reservation" Match="NavLinkMatch.All">
-    <button>reserve</button>
-</NavLink>
+@if (_createRoom)
+{
+    <RoomComponent Room="@NewRoom()" RoomTemplates="_roomTemplates" Mode="Create" OnSave="AddRoomAsync" />
+}
 
 @code {
+    private bool _createRoom = false;
+    private List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
+    private Room NewRoom() => new Models.Room() { Floor=0, Number=1 };
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await RefreshTemplates();
+            StateHasChanged();
+        }
+        await base.OnInitializedAsync();
+    }
+
+
+    protected async Task AddRoomAsync(Room room)
+    {
+        await DbContext.Rooms.AddAsync(room);
+         await DbContext.SaveChangesAsync();
+        _createRoom = false;
+    }
+
+    protected async Task RefreshTemplates()
+        => _roomTemplates = await GetAllRoomTemplatesAsync();
+
+    protected Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
+        => DbContext.RoomTemplates.ToListAsync();
 }

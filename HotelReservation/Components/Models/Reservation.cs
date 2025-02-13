@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HotelReservation.Data;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelReservation.Components.Models
@@ -6,17 +7,19 @@ namespace HotelReservation.Components.Models
     public class Reservation
     {
         [Key]
-        public uint Id { get; set; }
+        public int Id { get; set; }
 
-        public required uint RoomId { get; set; }
+        public required Room Room { get; set; }
 
-        public required uint UserId { get; set; }
+        public required ApplicationUser UserId { get; set; }
 
-        public required DateTime ReservationBegin { get; set; }
+        public required DateTime Begin { get; set; }
 
-        public required DateTime ReservationEnd { get; set; }
+        public required DateTime End { get; set; }
 
-        public required byte GuestNumber { get; set; }
+        public required byte AdultsNumber { get; set; }
+
+        public required byte ChildrenNumber { get; set; }
 
         public string? Request { get; set; }
 

@@ -2,21 +2,21 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
 
 namespace HotelReservation.Components.Models
 {
     public class Room
     {
         [Key]
-        public uint Id;
+        public int Id { get; set; }
 
-        public required RoomTemplate Type;
+        public RoomTemplate Type { get; set; }
 
-        public required uint Floor;
+        public required int Floor { get; set; }
 
-        public required uint Number;
-
-        public required string Availability;
+        public required int Number { get; set; }
+        //public IEnumerable<Reservation> Reservations { get; set; }
     }
 
 }

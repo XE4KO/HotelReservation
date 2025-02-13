@@ -79,7 +79,7 @@ namespace HotelReservation.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DoubleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     SingleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    NightlyPrice = table.Column<uint>(type: "int unsigned", nullable: false),
+                    NightlyPrice = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
@@ -216,6 +216,28 @@ namespace HotelReservation.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    TypeId = table.Column<int>(type: "int", nullable: false),
+                    Floor = table.Column<int>(type: "int", nullable: false),
+                    Number = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_RoomTemplates_TypeId",
+                        column: x => x.TypeId,
+                        principalTable: "RoomTemplates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -252,6 +274,11 @@ namespace HotelReservation.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_TypeId",
+                table: "Rooms",
+                column: "TypeId");
         }
 
         /// <inheritdoc />
@@ -273,13 +300,16 @@ namespace HotelReservation.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "RoomTemplates");
+                name: "Rooms");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "RoomTemplates");
         }
     }
 }

@@ -5,7 +5,6 @@
 @using System.Threading.Channels
 @using Microsoft.EntityFrameworkCore
 @using System.ComponentModel
-@inject NavigationManager NavManager
 @inject ApplicationDbContext DbContext;
 
 <h3>Rooms</h3>
@@ -13,13 +12,8 @@
 
 <div class="nav-links">
     <button @onclick="SwitchCreateRoomTemplate">create room</button>
-    @*     <NavLink href="room_creator" Match="NavLinkMatch.All">
-    </NavLink>
-    <NavLink href="room" Match="NavLinkMatch.All">
-        <button>room</button>
-    </NavLink>
- *@    
-    @if (_createRoom)
+
+    @if (_createRoomTemplate)
     {
         <RoomTemplateComponent Template=@NewTemplate() Mode="Create" OnSave="AddRoomTemplateAsync" />
     }
@@ -49,14 +43,12 @@
 
 @code {
     private bool _isFirstRender = true;
-    bool _createRoom = false;
+    bool _createRoomTemplate = false;
     bool _viewRooms = false;
     RoomTemplate? _editTemplate;
     List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
     private RoomTemplate NewTemplate() => new Models.RoomTemplate() { DoubleBeds = 0, Name = "New_template", NightlyPrice = 0, SingleBeds = 0 };
-    protected override async void OnInitialized()
-    {
-    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -66,49 +58,54 @@
         }
         await base.OnInitializedAsync();
     }
-    async Task RefreshTemplates()
+
+    protected async Task RefreshTemplates()
         => _roomTemplates = await GetAllRoomTemplatesAsync();
-    
+
     protected void SwitchCreateRoomTemplate()
     {
-        _createRoom = !_createRoom;
+        _createRoomTemplate = !_createRoomTemplate;
         _editTemplate = null;
     }
+
     protected async Task AddRoomTemplateAsync(Models.RoomTemplate template)
     {
         await DbContext.RoomTemplates.AddAsync(template);
         await DbContext.SaveChangesAsync();
-        // _roomTemplates.Add(template);
-        // StateHasChanged();
         await RefreshTemplates();
-        _createRoom = false;
+        _createRoomTemplate = false;
     }
+
     protected Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
         => DbContext.RoomTemplates.ToListAsync();
 
-    private void EditTemplate(RoomTemplate template)
+    protected void EditTemplate(RoomTemplate template)
     {
         if (_editTemplate == template)
         {
             _editTemplate = null;
-        }else{
+        }
+        else
+        {
             _editTemplate = template;
         }
-        _createRoom = false;
+        _createRoomTemplate = false;
     }
-    private async Task DeleteTemplateAsync(RoomTemplate template)
+
+    protected async Task DeleteTemplateAsync(RoomTemplate template)
     {
         DbContext.RoomTemplates.Remove(template);
         await DbContext.SaveChangesAsync();
         _roomTemplates.Remove(template);
         StateHasChanged();
     }
+
     protected async Task UpdateRoomTemplateAsync(Models.RoomTemplate template)
     {
         DbContext.RoomTemplates.Update(template);
         await DbContext.SaveChangesAsync();
         _editTemplate = null;
         StateHasChanged();
-        _createRoom = false;
+        _createRoomTemplate = false;
     }
 }

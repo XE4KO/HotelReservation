@@ -22,6 +22,30 @@ namespace HotelReservation.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Floor")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TypeId");
+
+                    b.ToTable("Rooms");
+                });
+
             modelBuilder.Entity("HotelReservation.Components.Models.RoomTemplate", b =>
                 {
                     b.Property<int>("Id")
@@ -40,8 +64,8 @@ namespace HotelReservation.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<uint>("NightlyPrice")
-                        .HasColumnType("int unsigned");
+                    b.Property<int>("NightlyPrice")
+                        .HasColumnType("int");
 
                     b.Property<byte>("SingleBeds")
                         .HasColumnType("tinyint unsigned");
@@ -245,6 +269,17 @@ namespace HotelReservation.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
+                {
+                    b.HasOne("HotelReservation.Components.Models.RoomTemplate", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
