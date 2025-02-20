@@ -42,9 +42,7 @@
 </div>
 
 @code {
-    private bool _isFirstRender = true;
     bool _createRoomTemplate = false;
-    bool _viewRooms = false;
     RoomTemplate? _editTemplate;
     List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
     private RoomTemplate NewTemplate() => new Models.RoomTemplate() { DoubleBeds = 0, Name = "New_template", NightlyPrice = 0, SingleBeds = 0 };

@@ -5,39 +5,93 @@
 @rendermode InteractiveServer
 @inject ApplicationDbContext DbContext;
 
-<button @onclick="() => _createRoom=!_createRoom">Create Room</button>
 
-@if (_createRoom)
+
+<RoomTemplateSelectComponent OnChange="x => _selectedTemplate = x" RoomTemplates="_roomTemplates"/>
+<button @onclick="() => AddNewFloorAsync()">Floor+</button>
+@foreach (var floor in _rooms)
 {
-    <RoomComponent Room="@NewRoom()" RoomTemplates="_roomTemplates" Mode="Create" OnSave="AddRoomAsync" />
+	<div>
+		<span>|</span><label>@floor.Key</label><span>|</span>
+		@foreach (var room in floor)
+		{
+			<input @bind-value="room.Number" />
+			<label>@room.Type.Name</label>
+			<button @onclick="() => DeleteRoomAsync(room)">x</button>
+			<span>|</span>
+		}
+		<button @onclick="() => AddNewRoomAsync(floor.Key)">+</button>
+	</div>
 }
 
 @code {
-    private bool _createRoom = false;
-    private List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
-    private Room NewRoom() => new Models.Room() { Floor=0, Number=1 };
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await RefreshTemplates();
-            StateHasChanged();
-        }
-        await base.OnInitializedAsync();
-    }
-
-
-    protected async Task AddRoomAsync(Room room)
-    {
-        await DbContext.Rooms.AddAsync(room);
-         await DbContext.SaveChangesAsync();
-        _createRoom = false;
-    }
-
-    protected async Task RefreshTemplates()
-        => _roomTemplates = await GetAllRoomTemplatesAsync();
-
-    protected Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
-        => DbContext.RoomTemplates.ToListAsync();
+	private List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
+	private RoomTemplate? _selectedTemplate;
+	private List<IGrouping<int, Room>> _rooms = new();
+	private async Task<Room> NewFloorRoomAsync()
+	{
+		int newFloor = await GetNewFloorAsync();
+		return new Room { Floor = newFloor, Number = 1, Type = _selectedTemplate};
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await RefreshAsync();
+			StateHasChanged();
+		}
+		await base.OnAfterRenderAsync(firstRender);
+	}
+	private async Task RefreshRoomsAsync()
+	{
+		_rooms = await DbContext.Rooms
+			.OrderBy(room => room.Floor)
+			.ThenBy(room => room.Number)
+			.GroupBy(room => room.Floor)
+			.ToListAsync();
+	}
+	private async Task DeleteRoomAsync(Room room)
+	{
+		DbContext.Rooms.Remove(room);
+		await DbContext.SaveChangesAsync();
+		await RefreshRoomsAsync();
+	}
+	private async Task<int> GetNewFloorAsync()
+	{
+		if (!await DbContext.Rooms.AnyAsync())//A second operation was started on this context instance before a previous operation completed
+			return 0;
+		else
+			return (await DbContext.Rooms.MaxAsync(room => room.Floor)) + 1;
+	}
+	private async Task<int> GetNewRoomNumberAsync(int floor)
+	{
+		var roomNumbers = await DbContext.Rooms
+		.Where(room => room.Floor == floor)
+		.Select(room => room.Number)
+		.ToListAsync();
+		return roomNumbers.Max() + 1;
+	}
+	private async Task AddNewFloorAsync(){
+		await AddRoomAsync(await NewFloorRoomAsync());
+	}
+	private async Task AddNewRoomAsync(int floor)
+	{
+		int newNumber = await GetNewRoomNumberAsync(floor);
+		await AddRoomAsync(new Room() { Floor = floor, Number = newNumber, Type = _selectedTemplate });
+		await RefreshAsync();
+	}
+	protected async Task AddRoomAsync(Room room)
+	{
+		await DbContext.Rooms.AddAsync(room);
+		await DbContext.SaveChangesAsync();
+		await RefreshAsync();
+	}
+	protected async Task RefreshTemplatesAsync()
+		=> _roomTemplates = await GetAllRoomTemplatesAsync();
+	protected Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
+		=> DbContext.RoomTemplates.ToListAsync();
+	private async Task RefreshAsync(){
+		await RefreshTemplatesAsync();
+		await RefreshRoomsAsync();
+	}
 }
