@@ -3,28 +3,29 @@
 @using Microsoft.EntityFrameworkCore
 @rendermode InteractiveServer
 
-   <div>
-        <label for="type" required>Type</label>
-        <select id="type" @onchange="ChangeTemplate" required>
-            <option value="">-- Select an option --</option>
-            @foreach (var template in RoomTemplates)
-            {
-                <option value=@template.Id>@template.Name</option>
-            }
-        </select>
-   </div>
+<div>
+    <label for="type">Type</label>
+    <select id="type" @onchange="ChangeTemplate" required>
+        <option value="">-- Select an option --</option>
+        @foreach (var template in RoomTemplates)
+        {
+            <option value=@template.Id>@template.Name</option>
+        }
+    </select>
+    
+</div>
 
 @code {
     [Parameter] public required List<RoomTemplate> RoomTemplates { get; set; }
     [Parameter] public EventCallback<RoomTemplate> OnChange { get; set; }
-    
+
     protected override void OnInitialized()
     {
     }
     private async Task ChangeTemplate(ChangeEventArgs args){
         if (int.TryParse((string)args.Value, out var templateId))
             await OnChange.InvokeAsync(RoomTemplates.Single(x => x.Id == templateId));
-        else 
+        else
             await OnChange.InvokeAsync(null);
     }
 }

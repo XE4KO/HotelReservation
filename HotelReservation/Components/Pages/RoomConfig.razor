@@ -15,9 +15,18 @@
 		<span>|</span><label>@floor.Key</label><span>|</span>
 		@foreach (var room in floor)
 		{
-			<input @bind-value="room.Number" />
-			<label>@room.Type.Name</label>
+			if (_editingRoom && _editRoom == room)
+			{
+				<RoomTemplateSelectComponent OnChange="x => room.Type = x" RoomTemplates="_roomTemplates" />
+				<input @bind-value="room.Number" />
+			}else
+			{
+				<label>@room.Number</label>
+				<label>@room.Type.Name</label>
+			}
+
 			<button @onclick="() => DeleteRoomAsync(room)">x</button>
+			<button @onclick="() => EditRoomAsync(room)">edit</button>
 			<span>|</span>
 		}
 		<button @onclick="() => AddNewRoomAsync(floor.Key)">+</button>
@@ -25,6 +34,8 @@
 }
 
 @code {
+	private bool _editingRoom;
+	private Room? _editRoom;
 	private List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
 	private RoomTemplate? _selectedTemplate;
 	private List<IGrouping<int, Room>> _rooms = new();
@@ -59,7 +70,7 @@
 	private async Task<int> GetNewFloorAsync()
 	{
 		if (!await DbContext.Rooms.AnyAsync())//A second operation was started on this context instance before a previous operation completed
-			return 0;
+			return 1;
 		else
 			return (await DbContext.Rooms.MaxAsync(room => room.Floor)) + 1;
 	}
@@ -80,18 +91,40 @@
 		await AddRoomAsync(new Room() { Floor = floor, Number = newNumber, Type = _selectedTemplate });
 		await RefreshAsync();
 	}
-	protected async Task AddRoomAsync(Room room)
+	private async Task AddRoomAsync(Room room)
 	{
 		await DbContext.Rooms.AddAsync(room);
 		await DbContext.SaveChangesAsync();
 		await RefreshAsync();
 	}
-	protected async Task RefreshTemplatesAsync()
+	private async Task RefreshTemplatesAsync()
 		=> _roomTemplates = await GetAllRoomTemplatesAsync();
-	protected Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
+	private Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
 		=> DbContext.RoomTemplates.ToListAsync();
 	private async Task RefreshAsync(){
 		await RefreshTemplatesAsync();
 		await RefreshRoomsAsync();
+	}
+	private async Task EditRoomAsync(Room room)
+	{
+		if (_editRoom == room)
+		{
+			_editRoom = null;
+		}
+		else
+		{
+			_editRoom = room;
+		}
+		if (!_editingRoom)
+		{
+			_editingRoom = true;
+
+		}else
+		{
+			_editingRoom = false;
+			await DbContext.SaveChangesAsync();
+		}
+	}
+	private async Task RefreshRoomNumber(Room room){
 	}
 }
