@@ -77,8 +77,8 @@ namespace HotelReservation.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DoubleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    SingleBeds = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    Adults = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    Kids = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     NightlyPrice = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -86,6 +86,21 @@ namespace HotelReservation.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RoomTemplates", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<uint>(type: "int unsigned", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -238,6 +253,31 @@ namespace HotelReservation.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "RoomTemplateTag",
+                columns: table => new
+                {
+                    TagsId = table.Column<uint>(type: "int unsigned", nullable: false),
+                    TypesId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoomTemplateTag", x => new { x.TagsId, x.TypesId });
+                    table.ForeignKey(
+                        name: "FK_RoomTemplateTag_RoomTemplates_TypesId",
+                        column: x => x.TypesId,
+                        principalTable: "RoomTemplates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoomTemplateTag_Tags_TagsId",
+                        column: x => x.TagsId,
+                        principalTable: "Tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -279,6 +319,11 @@ namespace HotelReservation.Migrations
                 name: "IX_Rooms_TypeId",
                 table: "Rooms",
                 column: "TypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomTemplateTag_TypesId",
+                table: "RoomTemplateTag",
+                column: "TypesId");
         }
 
         /// <inheritdoc />
@@ -303,6 +348,9 @@ namespace HotelReservation.Migrations
                 name: "Rooms");
 
             migrationBuilder.DropTable(
+                name: "RoomTemplateTag");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
@@ -310,6 +358,9 @@ namespace HotelReservation.Migrations
 
             migrationBuilder.DropTable(
                 name: "RoomTemplates");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
         }
     }
 }

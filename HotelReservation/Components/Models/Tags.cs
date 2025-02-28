@@ -9,6 +9,6 @@ namespace HotelReservation.Components.Models
         [Key]
         public uint Id { get; set; }
         public required string Name { get; set; }
-        //public IEnumerable<RoomTemplateToTag> Types { get; set; }
+        public IEnumerable<RoomTemplate> Types { get; set; }
     }
 }

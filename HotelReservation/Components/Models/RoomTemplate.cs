@@ -10,16 +10,16 @@ namespace HotelReservation.Components.Models
 
         public required string Name { get; set; }
 
-        public required byte DoubleBeds { get; set; }
+        public required byte Adults { get; set; }
 
-        public required byte SingleBeds { get; set; }
+        public required byte Kids { get; set; }
 
-        //public IEnumerable<RoomTemplateToTag> Tags;
+        public IEnumerable<Tag> Tags { get; set; }
 
-        public required int NightlyPrice { get; set; }
+		public required int NightlyPrice { get; set; }
 
-        public IEnumerable<Room> Rooms;
-        public string? Description { get; set; }
+        public IEnumerable<Room> Rooms { get; set; }
+		public string? Description { get; set; }
 
     }
 }

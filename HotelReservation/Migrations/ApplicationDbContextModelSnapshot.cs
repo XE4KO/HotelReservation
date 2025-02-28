@@ -54,10 +54,13 @@ namespace HotelReservation.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<byte>("Adults")
+                        .HasColumnType("tinyint unsigned");
+
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<byte>("DoubleBeds")
+                    b.Property<byte>("Kids")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("Name")
@@ -67,12 +70,26 @@ namespace HotelReservation.Migrations
                     b.Property<int>("NightlyPrice")
                         .HasColumnType("int");
 
-                    b.Property<byte>("SingleBeds")
-                        .HasColumnType("tinyint unsigned");
-
                     b.HasKey("Id");
 
                     b.ToTable("RoomTemplates");
+                });
+
+            modelBuilder.Entity("HotelReservation.Components.Models.Tag", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("HotelReservation.Data.ApplicationUser", b =>
@@ -271,10 +288,25 @@ namespace HotelReservation.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("RoomTemplateTag", b =>
+                {
+                    b.Property<uint>("TagsId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<int>("TypesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TagsId", "TypesId");
+
+                    b.HasIndex("TypesId");
+
+                    b.ToTable("RoomTemplateTag");
+                });
+
             modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
                 {
                     b.HasOne("HotelReservation.Components.Models.RoomTemplate", "Type")
-                        .WithMany()
+                        .WithMany("Rooms")
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -331,6 +363,26 @@ namespace HotelReservation.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("RoomTemplateTag", b =>
+                {
+                    b.HasOne("HotelReservation.Components.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HotelReservation.Components.Models.RoomTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("TypesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HotelReservation.Components.Models.RoomTemplate", b =>
+                {
+                    b.Navigation("Rooms");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,7 +1,11 @@
-﻿namespace HotelReservation.Components.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace HotelReservation.Components.Models
 {
-    public class RoomTemplateToTag
+	[Keyless]
+	public class RoomTemplateToTag
     {
+        //useless?
         public required RoomTemplate Type { get; set; }
         public required Tag Tag { get; set; }
 
