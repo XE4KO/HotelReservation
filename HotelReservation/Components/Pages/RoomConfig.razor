@@ -7,7 +7,9 @@
 
 
 
-<RoomTemplateSelectComponent OnChange="x => _selectedTemplate = x" RoomTemplates="_roomTemplates"/>
+<RoomTemplateSelectComponent OnChange="x => _selectedTemplate = x" RoomTemplates="_roomTemplates">
+	<label for="type">Type</label>
+</RoomTemplateSelectComponent>
 <button @onclick="() => AddNewFloorAsync()">Floor+</button>
 @foreach (var floor in _rooms)
 {
@@ -17,14 +19,13 @@
 		{
 			if (_editingRoom && _editRoom == room)
 			{
-				<RoomTemplateSelectComponent OnChange="x => room.Type = x" RoomTemplates="_roomTemplates" />
 				<input @bind-value="room.Number" />
+				<RoomTemplateSelectComponent OnChange="x => room.Type = x" RoomTemplates="_roomTemplates" />
 			}else
 			{
 				<label>@room.Number</label>
 				<label>@room.Type.Name</label>
 			}
-
 			<button @onclick="() => DeleteRoomAsync(room)">x</button>
 			<button @onclick="() => EditRoomAsync(room)">edit</button>
 			<span>|</span>
@@ -69,7 +70,7 @@
 	}
 	private async Task<int> GetNewFloorAsync()
 	{
-		if (!await DbContext.Rooms.AnyAsync())//A second operation was started on this context instance before a previous operation completed
+		if (!await DbContext.Rooms.AnyAsync())
 			return 1;
 		else
 			return (await DbContext.Rooms.MaxAsync(room => room.Floor)) + 1;
@@ -107,23 +108,18 @@
 	}
 	private async Task EditRoomAsync(Room room)
 	{
-		if (_editRoom == room)
+		if (_editingRoom && _editRoom == room)
 		{
+			_editingRoom = false;
 			_editRoom = null;
-		}
-		else
-		{
-			_editRoom = room;
-		}
-		if (!_editingRoom)
-		{
-			_editingRoom = true;
 
 		}else
 		{
-			_editingRoom = false;
-			await DbContext.SaveChangesAsync();
+			_editingRoom = true;
+			_editRoom = room;
 		}
+		await DbContext.SaveChangesAsync();
+
 	}
 	private async Task RefreshRoomNumber(Room room){
 	}
