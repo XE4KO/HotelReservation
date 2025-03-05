@@ -3,8 +3,8 @@
 @using Microsoft.EntityFrameworkCore
 @rendermode InteractiveServer
 
-<span>
-    @ChildContent
+<div>
+    <label for="type">Type</label>
     <select id="type" @onchange="ChangeTemplate" required>
         <option value="">-- Select an option --</option>
         @foreach (var template in RoomTemplates)
@@ -12,12 +12,12 @@
             <option value=@template.Id>@template.Name</option>
         }
     </select>
-</span>
+    
+</div>
 
 @code {
     [Parameter] public required List<RoomTemplate> RoomTemplates { get; set; }
     [Parameter] public EventCallback<RoomTemplate> OnChange { get; set; }
-    [Parameter] public RenderFragment? ChildContent { get; set; }
 
     protected override void OnInitialized()
     {
