@@ -1,46 +1,121 @@
-﻿@page "/room_creator"
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 
+@using HotelReservation.Components.Models
 @using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations.Schema
+@inject ApplicationDbContext DbContext
 
 <form>
     <div>
         <label for="name">Name</label>
-        <input type="text" id="name" name="name" @bind-value="@Template.Name" required />
+        <input type="text" id="name" name="name" @bind="Template.Name" required />
     </div>
     <div>
         <label for="dbeds">Adults</label>
-        <input type="number" id="adults" name="adults" @bind-value="@Template.Adults" required />
+        <input type="number" id="adults" name="adults" @bind="Template.Adults" required />
     </div>
     <div>
         <label for="sbeds">Kids</label>
-        <input type="number" id="kids" name="kids" @bind-value="@Template.Kids" required />
+        <input type="number" id="kids" name="kids" @bind="Template.Kids" required />
     </div>
     <div>
         <label for="price">Price per Night</label>
-        <input type="number" id="price" name="price" @bind-value="@Template.NightlyPrice" required />
+        <input type="number" id="price" name="price" @bind="Template.NightlyPrice" required />
+    </div>
+    <div>
+        <label>Tags</label>
+        @foreach (var templateTag in Template.Tags)
+        {
+            <div>
+                <input type="text" list="tagList" id="tags" placeholder="Select/Search"
+                @bind="templateTag.SelectedTagName"
+                @bind:after="() => ValidateTag(templateTag)" />
+                <button type="button" @onclick=@(() => DeleteTag(templateTag))>&#x2716;</button>
+            </div>
+        }
+
+        <div>
+            <button type="button" @onclick="AddTag" id="newTag" disabled="@InvalidTag">Add New Tag</button>
+        </div>
+        <datalist id="tagList">
+            @foreach (var tag in Tags)
+            {
+                <option value="@tag.Name">@tag.Name</option>
+            }
+        </datalist>
+        @if (!string.IsNullOrEmpty(TagValidationError))
+        {
+            <div class="text-danger">*@TagValidationError</div>
+        }
     </div>
     <div>
         <label for="desc">Description</label>
-        <input type="text" id="desc" name="desc" @bind-value="@Template.Description" />
+        <input type="text" id="desc" name="desc" @bind="Template.Description" />
     </div>
     @if (Mode != null)
     {
-        <input type="button" @onclick="Save" id="submit" value=@Mode></input>
+        <input type="button" @onclick="Save" id="submit" value="@Mode" disabled="@InvalidTag" />
     }
 </form>
 
 @code {
-    [Parameter] public required Models.RoomTemplate Template { get; set; }
+    [Parameter] public required RoomTemplate Template { get; set; }
     [Parameter] public required string? Mode { get; set; }
-    [Parameter] public EventCallback<Models.RoomTemplate> OnSave { get; set; }
+    [Parameter] public EventCallback<RoomTemplate> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
-    protected override void OnInitialized()
+
+    private List<Tag> Tags = new();
+    private string TagValidationError = "";
+
+    private bool InvalidTag => !string.IsNullOrEmpty(TagValidationError);
+
+    protected override async Task OnInitializedAsync()
     {
+        Tags = await DbContext.Tags.AsNoTracking().ToListAsync();
+        foreach (var templateTag in Template.Tags)
+        {
+            templateTag.SelectedTagName = templateTag.Name;
+        }
     }
+
+    private void AddTag()
+    {
+        if (Template.Tags == null)
+        {
+            Template.Tags = new List<Tag>();
+        }
+        TagValidationError = "Please enter a tag.";
+        Template.Tags.Add(new Tag { Name = "" });
+    }
+
+    private void DeleteTag(Tag tag){
+        Template.Tags.Remove(tag);
+        if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.SelectedTagName) || !Tags.Any(valid => valid.Name == t.SelectedTagName)))
+        {
+            TagValidationError = "";
+        }
+    }
+
+    private void ValidateTag(Tag tag)
+    {
+        var validTag = Tags.FirstOrDefault(t => t.Name == tag.SelectedTagName);
+        if (string.IsNullOrWhiteSpace(tag.SelectedTagName) || validTag == null || Template.Tags.Any(t => t.Id == validTag.Id))
+        {
+            tag.Id = 0;
+            TagValidationError = "Invalid tag. Please select a valid tag from the list. No duplicates.";
+            return;
+        }
+        else{
+            TagValidationError = "";
+        }
+        tag.Id = validTag.Id;
+        tag.Name = validTag.Name;
+        tag.SelectedTagName = validTag.Name;
+    }
+
     private async Task Save(MouseEventArgs e)
     {
         await OnSave.InvokeAsync(Template);
     }
-    // => OnCancel.InvokeAsync();
 }

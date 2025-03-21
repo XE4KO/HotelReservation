@@ -14,11 +14,11 @@ namespace HotelReservation.Components.Models
 
         public required byte Kids { get; set; }
 
-        public IEnumerable<Tag> Tags { get; set; }
+        public required ICollection<Tag> Tags { get; set; }
 
 		public required int NightlyPrice { get; set; }
 
-        public IEnumerable<Room> Rooms { get; set; }
+        public IEnumerable<Room>? Rooms { get; set; }
 		public string? Description { get; set; }
 
     }

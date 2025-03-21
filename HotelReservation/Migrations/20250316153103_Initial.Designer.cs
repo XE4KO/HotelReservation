@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250228134252_Initial")]
+    [Migration("20250316153103_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -80,11 +80,11 @@ namespace HotelReservation.Migrations
 
             modelBuilder.Entity("HotelReservation.Components.Models.Tag", b =>
                 {
-                    b.Property<uint>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int unsigned");
+                        .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -293,8 +293,8 @@ namespace HotelReservation.Migrations
 
             modelBuilder.Entity("RoomTemplateTag", b =>
                 {
-                    b.Property<uint>("TagsId")
-                        .HasColumnType("int unsigned");
+                    b.Property<int>("TagsId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TypesId")
                         .HasColumnType("int");

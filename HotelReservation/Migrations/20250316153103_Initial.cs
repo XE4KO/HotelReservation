@@ -93,7 +93,7 @@ namespace HotelReservation.Migrations
                 name: "Tags",
                 columns: table => new
                 {
-                    Id = table.Column<uint>(type: "int unsigned", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -257,7 +257,7 @@ namespace HotelReservation.Migrations
                 name: "RoomTemplateTag",
                 columns: table => new
                 {
-                    TagsId = table.Column<uint>(type: "int unsigned", nullable: false),
+                    TagsId = table.Column<int>(type: "int", nullable: false),
                     TypesId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

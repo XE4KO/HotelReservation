@@ -37,7 +37,7 @@
 @code {
 	private bool _editingRoom;
 	private Room? _editRoom;
-	private List<RoomTemplate> _roomTemplates = new List<RoomTemplate>();
+	private List<RoomTemplate> _roomTemplates = new();
 	private RoomTemplate? _selectedTemplate;
 	private List<IGrouping<int, Room>> _rooms = new();
 	private async Task<Room> NewFloorRoomAsync()
@@ -120,7 +120,5 @@
 		}
 		await DbContext.SaveChangesAsync();
 
-	}
-	private async Task RefreshRoomNumber(Room room){
 	}
 }
