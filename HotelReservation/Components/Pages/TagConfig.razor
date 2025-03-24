@@ -5,6 +5,9 @@
 @rendermode InteractiveServer
 @inject ApplicationDbContext DbContext;
 
+<h3>Tags</h3>
+<br>
+
 <TagComponent NewTag="NewTag()" OnSave="NewTagAsync"/>
 <div>
     @foreach (var tag in Tags)
@@ -17,7 +20,7 @@
 </div>
 
 @code {
-    private Tag NewTag() => new Tag() {Name = "new_tag"};
+    private Tag NewTag() => new Tag() {Name = ""};
     private List<Tag> Tags = new();
 
     protected override async Task OnInitializedAsync()

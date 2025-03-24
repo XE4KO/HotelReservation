@@ -9,26 +9,26 @@
 <form>
     <div>
         <label for="name">Name</label>
-        <input type="text" id="name" name="name" @bind="Template.Name" required />
+        <input type="text" id="name" name="name" placeholder="(required)" @bind="Template.Name" required />
     </div>
     <div>
         <label for="dbeds">Adults</label>
-        <input type="number" id="adults" name="adults" @bind="Template.Adults" required />
+        <input type="number" id="adults" name="adults" placeholder="(required)" @bind="Template.Adults" required />
     </div>
     <div>
         <label for="sbeds">Kids</label>
-        <input type="number" id="kids" name="kids" @bind="Template.Kids" required />
+        <input type="number" id="kids" name="kids" placeholder="(required)" @bind="Template.Kids" required />
     </div>
     <div>
         <label for="price">Price per Night</label>
-        <input type="number" id="price" name="price" @bind="Template.NightlyPrice" required />
+        <input type="number" id="price" name="price" placeholder="(required)" @bind="Template.NightlyPrice" required />
     </div>
     <div>
         <label>Tags</label>
         @foreach (var templateTag in Template.Tags)
         {
             <div>
-                <input type="text" list="tagList" id="tags" placeholder="Select/Search"
+                <input type="text" list="tagList" id="tags" placeholder="Select/Search Tag"
                 @bind="templateTag.SelectedTagName"
                 @bind:after="() => ValidateTag(templateTag)" />
                 <button type="button" @onclick=@(() => DeleteTag(templateTag))>&#x2716;</button>
@@ -44,14 +44,14 @@
                 <option value="@tag.Name">@tag.Name</option>
             }
         </datalist>
-        @if (!string.IsNullOrEmpty(TagValidationError))
+        @if (!string.IsNullOrEmpty(TagErrorMessage))
         {
-            <div class="text-danger">*@TagValidationError</div>
+            <div class="text-danger">@TagErrorMessage</div>
         }
     </div>
     <div>
         <label for="desc">Description</label>
-        <input type="text" id="desc" name="desc" @bind="Template.Description" />
+        <input type="text" id="desc" name="desc" placeholder="(optional)" @bind="Template.Description" />
     </div>
     @if (Mode != null)
     {
@@ -66,9 +66,9 @@
     [Parameter] public EventCallback OnCancel { get; set; }
 
     private List<Tag> Tags = new();
-    private string TagValidationError = "";
+    private string TagErrorMessage = "";
 
-    private bool InvalidTag => !string.IsNullOrEmpty(TagValidationError);
+    private bool InvalidTag => !string.IsNullOrEmpty(TagErrorMessage);
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,7 +85,7 @@
         {
             Template.Tags = new List<Tag>();
         }
-        TagValidationError = "Please enter a tag.";
+        TagErrorMessage = "Please enter a tag.";
         Template.Tags.Add(new Tag { Name = "" });
     }
 
@@ -93,7 +93,7 @@
         Template.Tags.Remove(tag);
         if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.SelectedTagName) || !Tags.Any(valid => valid.Name == t.SelectedTagName)))
         {
-            TagValidationError = "";
+            TagErrorMessage = "";
         }
     }
 
@@ -103,11 +103,11 @@
         if (string.IsNullOrWhiteSpace(tag.SelectedTagName) || validTag == null || Template.Tags.Any(t => t.Id == validTag.Id))
         {
             tag.Id = 0;
-            TagValidationError = "Invalid tag. Please select a valid tag from the list. No duplicates.";
+            TagErrorMessage = "Invalid tag. Please select a valid tag from the list. No duplicates.";
             return;
         }
         else{
-            TagValidationError = "";
+            TagErrorMessage = "";
         }
         tag.Id = validTag.Id;
         tag.Name = validTag.Name;

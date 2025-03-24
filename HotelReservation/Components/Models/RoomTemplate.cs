@@ -19,7 +19,9 @@ namespace HotelReservation.Components.Models
 		public required int NightlyPrice { get; set; }
 
         public IEnumerable<Room>? Rooms { get; set; }
-		public string? Description { get; set; }
+        public IEnumerable<Image>? Images { get; set; }
+
+        public string? Description { get; set; }
 
     }
 }

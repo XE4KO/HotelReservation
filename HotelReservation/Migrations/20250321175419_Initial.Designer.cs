@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250316153103_Initial")]
+    [Migration("20250321175419_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,23 @@ namespace HotelReservation.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("HotelReservation.Components.Models.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Images");
+                });
 
             modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
                 {
@@ -39,7 +56,7 @@ namespace HotelReservation.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.Property<int>("TypeId")
+                    b.Property<int?>("TypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -157,6 +174,21 @@ namespace HotelReservation.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("ImageRoomTemplate", b =>
+                {
+                    b.Property<int>("ImagesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TemplatesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ImagesId", "TemplatesId");
+
+                    b.HasIndex("TemplatesId");
+
+                    b.ToTable("ImageRoomTemplate");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -310,11 +342,24 @@ namespace HotelReservation.Migrations
                 {
                     b.HasOne("HotelReservation.Components.Models.RoomTemplate", "Type")
                         .WithMany("Rooms")
-                        .HasForeignKey("TypeId")
+                        .HasForeignKey("TypeId");
+
+                    b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("ImageRoomTemplate", b =>
+                {
+                    b.HasOne("HotelReservation.Components.Models.Image", null)
+                        .WithMany()
+                        .HasForeignKey("ImagesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Type");
+                    b.HasOne("HotelReservation.Components.Models.RoomTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("TemplatesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -5,8 +5,8 @@
 @inject ApplicationDbContext DbContext;
 
 <div>
-    <label for="name">Tag name</label>
-    <input type="text" id="name" name="tag name" @bind-value="@NewTag.Name" @onkeyup="OnSaveOnEnterAsync" required />
+    <label for="name">Name</label>
+    <input type="text" id="name" placeholder="Tag Name" @bind-value="@NewTag.Name" @onkeyup="OnSaveOnEnterAsync" required />
 </div>
 <div>
     <input type="button" @onclick="Save" value="add tag">

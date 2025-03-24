@@ -70,6 +70,21 @@ namespace HotelReservation.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Images",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Path = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Images", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "RoomTemplates",
                 columns: table => new
                 {
@@ -232,12 +247,37 @@ namespace HotelReservation.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ImageRoomTemplate",
+                columns: table => new
+                {
+                    ImagesId = table.Column<int>(type: "int", nullable: false),
+                    TemplatesId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ImageRoomTemplate", x => new { x.ImagesId, x.TemplatesId });
+                    table.ForeignKey(
+                        name: "FK_ImageRoomTemplate_Images_ImagesId",
+                        column: x => x.ImagesId,
+                        principalTable: "Images",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ImageRoomTemplate_RoomTemplates_TemplatesId",
+                        column: x => x.TemplatesId,
+                        principalTable: "RoomTemplates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Rooms",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    TypeId = table.Column<int>(type: "int", nullable: false),
+                    TypeId = table.Column<int>(type: "int", nullable: true),
                     Floor = table.Column<int>(type: "int", nullable: false),
                     Number = table.Column<int>(type: "int", nullable: false)
                 },
@@ -248,8 +288,7 @@ namespace HotelReservation.Migrations
                         name: "FK_Rooms_RoomTemplates_TypeId",
                         column: x => x.TypeId,
                         principalTable: "RoomTemplates",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -316,6 +355,11 @@ namespace HotelReservation.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ImageRoomTemplate_TemplatesId",
+                table: "ImageRoomTemplate",
+                column: "TemplatesId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Rooms_TypeId",
                 table: "Rooms",
                 column: "TypeId");
@@ -345,6 +389,9 @@ namespace HotelReservation.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ImageRoomTemplate");
+
+            migrationBuilder.DropTable(
                 name: "Rooms");
 
             migrationBuilder.DropTable(
@@ -355,6 +402,9 @@ namespace HotelReservation.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Images");
 
             migrationBuilder.DropTable(
                 name: "RoomTemplates");

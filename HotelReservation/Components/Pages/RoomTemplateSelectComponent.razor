@@ -5,7 +5,7 @@
 
 <span>
     @ChildContent
-    <select id="type" @onchange="ChangeTemplate" required>
+    <select id="type" placeholder="Select Template" @onchange="ChangeTemplate" required>
         <option value="">-- Select an option --</option>
         @foreach (var template in RoomTemplates)
         {

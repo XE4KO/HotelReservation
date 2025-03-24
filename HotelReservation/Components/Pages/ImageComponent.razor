@@ -1,0 +1,82 @@
+﻿@using HotelReservation.Components.Models
+@using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@inject IWebHostEnvironment Env
+
+<div>
+    <label for="image">Select Image</label>
+    <InputFile id="image" OnChange="@UpdateImagePath" MaxFileSize="10485760" style="color:transparent" accept=".JPG, .JPEG, .JPE, .BMP, .GIF, .PNG" required />
+</div>
+<div>
+    @if (SelectedFile != null && !string.IsNullOrEmpty(SelectedFile.Name))
+    {
+        <p>Selected File: @SelectedFile.Name</p>
+    }
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p style="color: red;">@ErrorMessage</p>
+    }
+</div>
+<div>
+    @if (!string.IsNullOrEmpty(Image.Path))
+    {
+        <img id="selected-image" src="@Image.Path" width="500" height="500" />
+    }
+</div>
+<div>
+    <button type="submit" @onclick="Save" disabled="@InvalidImage">Add</button>
+</div>
+
+@code {
+    [Parameter] public required Image Image { get; set; }
+    [Parameter] public EventCallback<Image> OnSave { get; set; }
+    private readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".bmp", ".gif", ".png" };
+    private IBrowserFile? SelectedFile;
+    private string FilePath = "";
+    private string FileName = "";
+    private string ErrorMessage = "Please select an image.";
+
+    private bool InvalidImage => !string.IsNullOrEmpty(ErrorMessage);
+    private async Task UpdateImagePath(InputFileChangeEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(FilePath))
+        {
+            File.Delete(FilePath);
+        }
+        SelectedFile = e.File;
+
+        if (SelectedFile != null)
+        {
+            ErrorMessage = "";  
+            var extension = Path.GetExtension(SelectedFile.Name).ToLower();
+            if (!AllowedExtensions.Contains(extension))
+            {
+                ErrorMessage = "Invalid file type. Please select an image file: .jpg, .jpeg, .bmp, .gif or .png.";
+                return;
+            }
+            var uploadsFolder = Path.Combine(Env.WebRootPath, "images");
+            FileName = Guid.NewGuid().ToString() + Path.GetExtension(SelectedFile.Name);
+            FilePath = Path.Combine(uploadsFolder, FileName);
+
+            await using var createStream = new FileStream(FilePath, FileMode.Create);
+            await SelectedFile.OpenReadStream(10485760).CopyToAsync(createStream);
+
+            Image.Path = $"/images/{FileName}";
+        }else
+        {
+            ErrorMessage = "Please select an image.";
+        }
+    }
+    private async Task Save(MouseEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(Image.Path))
+        {
+            await OnSave.InvokeAsync(Image);
+            SelectedFile = null;
+            FilePath = "";
+            ErrorMessage = "Please select an image.";
+        }
+    }
+
+}
