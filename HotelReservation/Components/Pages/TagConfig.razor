@@ -7,7 +7,8 @@
 
 <h3>Tags</h3>
 <br>
-
+@if (!_isLoading)
+{
 <TagComponent NewTag="NewTag()" OnSave="NewTagAsync"/>
 <div>
     @foreach (var tag in Tags)
@@ -18,14 +19,19 @@
         </div>
     }
 </div>
+}else{
+    <span>Loading...</span>
+}
 
 @code {
     private Tag NewTag() => new Tag() {Name = ""};
     private List<Tag> Tags = new();
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         Tags = await DbContext.Tags.ToListAsync();
+        _isLoading = false;
     }
 
     private async Task DeleteTagAsync(Tag tag)

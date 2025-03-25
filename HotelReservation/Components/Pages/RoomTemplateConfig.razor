@@ -10,37 +10,40 @@
 
 <h3>Room Templates</h3>
 <br>
+@if (!_isLoading)
+{
+    <div>
+        <button @onclick="SwitchCreateRoomTemplate">create room template</button>
 
-<div>
-    <button @onclick="SwitchCreateRoomTemplate">create room template</button>
-
-    @if (_createRoomTemplate)
-    {
-        <RoomTemplateComponent Template=@NewTemplate() Tags="_allTags" Mode="Create" OnSave="AddRoomTemplateAsync" />
-    }
-    @if (_roomTemplates == null)
-    {
-        <div>Loading...</div>
-    }
-    else
-    {
-        <div>
-            @foreach (RoomTemplate template in _roomTemplates)
-            {
-                <RoomTemplateOverview Template=template>
-                    <button @onclick=@(() => EditTemplate(template))>&#x270E;</button>
-                    <button @onclick=@(() => DeleteTemplateAsync(template))>&#x2716;</button>
-                </RoomTemplateOverview>
-                if (_editTemplate != null && template.Id == _editTemplate.Id)
+        @if (_createRoomTemplate)
+        {
+            <RoomTemplateComponent Template=@NewTemplate() Tags="_allTags" Mode="Create" OnSave="AddRoomTemplateAsync" />
+        }
+        @if (_roomTemplates == null)
+        {
+            <div>Loading...</div>
+        }
+        else
+        {
+            <div>
+                @foreach (RoomTemplate template in _roomTemplates)
                 {
-                    <RoomTemplateComponent Template=@_editTemplate Tags="_allTags" Mode="Save" OnSave="UpdateRoomTemplateAsync" />
+                    <RoomTemplateOverview Template=template>
+                        <button @onclick=@(() => EditTemplate(template))>&#x270E;</button>
+                        <button @onclick=@(() => DeleteTemplateAsync(template))>&#x2716;</button>
+                    </RoomTemplateOverview>
+                    if (_editTemplate != null && template.Id == _editTemplate.Id)
+                    {
+                        <RoomTemplateComponent Template=@_editTemplate Tags="_allTags" Mode="Save" OnSave="UpdateRoomTemplateAsync" />
+                    }
                 }
-            }
-        </div>
-    }
-
-
-</div>
+            </div>
+        }
+    </div>
+}else
+{
+    <span>Loading...</span>
+}
 
 @code {
     bool _createRoomTemplate = false;
@@ -48,6 +51,7 @@
     List<RoomTemplate> _roomTemplates = new();
     List<Tag> _allTags = new();
     private RoomTemplate NewTemplate() => new RoomTemplate() { Adults = 0, Name = "New_template", NightlyPrice = 0, Kids = 0, Tags = new List<Tag>(), Images = new List<Image>() };
+    private bool _isLoading = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -55,6 +59,7 @@
         {
             await RefreshTemplates();
             _allTags = await DbContext.Tags.ToListAsync();
+            _isLoading = false;
             StateHasChanged();
         }
         await base.OnInitializedAsync();

@@ -8,25 +8,31 @@
 
 <h3>Images</h3>
 <br>
-
-<ImageComponent OnSave="AddImageAsync" Image="NewImage()"/>
-<div>
-	@foreach (var image in SavedImages)
-	{
-		<div>
-			<img src="@image.Path" width="250" height="250"/>
-			<button @onclick="() => DeleteImageAsync(image)">X</button>
-		</div>
-	}
-</div>
+@if (!_isLoading)
+{
+	<ImageComponent OnSave="AddImageAsync" Image="NewImage()"/>
+	<div>
+		@foreach (var image in SavedImages)
+		{
+			<div>
+				<img src="@image.Path" width="250" height="250"/>
+				<button @onclick="() => DeleteImageAsync(image)">&#x2716;</button>
+			</div>
+		}
+	</div>
+}else{
+	<span>Loading...</span>
+}
 
 @code {
 	private Image NewImage() => new Image() {Path=""};
 	private List<Image> SavedImages = new();
+	private bool _isLoading = true;
 
 	protected override async Task OnInitializedAsync()
 	{
 		SavedImages = await DbContext.Images.ToListAsync();
+		_isLoading = false;
 	}
 	private async Task AddImageAsync(Image image){
 		await DbContext.Images.AddAsync(image);

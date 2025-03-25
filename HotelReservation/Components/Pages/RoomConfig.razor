@@ -7,7 +7,8 @@
 
 <h3>Rooms</h3>
 <br>
-
+@if (!_isLoading)
+{
 <RoomTemplateSelectComponent OnChange="x => _selectedTemplate = x" RoomTemplates="_roomTemplates">
 	<label for="type">Type</label>
 </RoomTemplateSelectComponent>
@@ -27,12 +28,15 @@
 				<label>@room.Number</label>
 				<label>@room.Type.Name</label>
 			}
-			<button @onclick="() => DeleteRoomAsync(room)">x</button>
-			<button @onclick="() => EditRoomAsync(room)">edit</button>
+				<button @onclick="() => DeleteRoomAsync(room)">&#x2716;</button>
+				<button @onclick="() => EditRoomAsync(room)">&#x270E;</button>
 			<span>|</span>
 		}
-		<button @onclick="() => AddNewRoomAsync(floor.Key)">+</button>
+			<button @onclick="() => AddNewRoomAsync(floor.Key)">&#x271A;</button>
 	</div>
+}
+}else{
+	<span>Loading...</span>
 }
 
 @code {
@@ -41,6 +45,8 @@
 	private List<RoomTemplate> _roomTemplates = new();
 	private RoomTemplate? _selectedTemplate;
 	private List<IGrouping<int, Room>> _rooms = new();
+	private bool _isLoading = true;
+
 	private async Task<Room> NewFloorRoomAsync()
 	{
 		int newFloor = await GetNewFloorAsync();
@@ -51,6 +57,7 @@
 		if (firstRender)
 		{
 			await RefreshAsync();
+			_isLoading = false;
 			StateHasChanged();
 		}
 		await base.OnAfterRenderAsync(firstRender);
