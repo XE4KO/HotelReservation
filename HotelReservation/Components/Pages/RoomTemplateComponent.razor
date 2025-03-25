@@ -1,10 +1,8 @@
 ﻿@rendermode InteractiveServer
-
 @using HotelReservation.Components.Models
 @using HotelReservation.Data
 @using Microsoft.EntityFrameworkCore
 @using System.ComponentModel.DataAnnotations.Schema
-@inject ApplicationDbContext DbContext
 
 <form>
     <div>
@@ -23,30 +21,45 @@
         <label for="price">Price per Night</label>
         <input type="number" id="price" name="price" placeholder="(required)" @bind="Template.NightlyPrice" required />
     </div>
+
     <div>
         <label>Tags</label>
         @foreach (var templateTag in Template.Tags)
         {
-            <div>
+            <div @key="templateTag">
                 <input type="text" list="tagList" id="tags" placeholder="Select/Search Tag"
-                @bind="templateTag.SelectedTagName"
+                @bind="templateTag.Name"
                 @bind:after="() => ValidateTag(templateTag)" />
-                <button type="button" @onclick=@(() => DeleteTag(templateTag))>&#x2716;</button>
+                <button type="button" @onclick="@(() => DeleteTag(templateTag))">&#x2716;</button>
             </div>
         }
-
         <div>
             <button type="button" @onclick="AddTag" id="newTag" disabled="@InvalidTag">Add New Tag</button>
         </div>
         <datalist id="tagList">
             @foreach (var tag in Tags)
             {
-                <option value="@tag.Name">@tag.Name</option>
+                <option value="@tag.Name"></option>
             }
         </datalist>
         @if (!string.IsNullOrEmpty(TagErrorMessage))
         {
             <div class="text-danger">@TagErrorMessage</div>
+        }
+    </div>
+
+    <div>
+        <button type="button" @onclick="() => isModalOpen = true">Select Image</button>
+        @if (isModalOpen)
+        {
+            <ImageSelectComponent OnSave="AddImage" OnCancel="() => isModalOpen = false" CurrentImages="Template.Images" />
+        }
+        @foreach (var image in Template.Images)
+        {
+            <div>
+                <img src="@image.Path" style="width:100px; height:100px;" />
+                <button type="button" @onclick="() => RemoveImage(image)">X</button>
+            </div>
         }
     </div>
     <div>
@@ -61,57 +74,66 @@
 
 @code {
     [Parameter] public required RoomTemplate Template { get; set; }
+    [Parameter] public required List<Tag> Tags { get; set; }
     [Parameter] public required string? Mode { get; set; }
     [Parameter] public EventCallback<RoomTemplate> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
-
-    private List<Tag> Tags = new();
+    private bool isModalOpen = false;
     private string TagErrorMessage = "";
-
     private bool InvalidTag => !string.IsNullOrEmpty(TagErrorMessage);
 
     protected override async Task OnInitializedAsync()
     {
-        Tags = await DbContext.Tags.AsNoTracking().ToListAsync();
-        foreach (var templateTag in Template.Tags)
-        {
-            templateTag.SelectedTagName = templateTag.Name;
-        }
+        // foreach (var templateTag in Template.Tags)
+        // {
+        //     templateTag.SelectedTagName = templateTag.Name;
+        // }
     }
 
     private void AddTag()
     {
-        if (Template.Tags == null)
-        {
-            Template.Tags = new List<Tag>();
-        }
         TagErrorMessage = "Please enter a tag.";
         Template.Tags.Add(new Tag { Name = "" });
     }
 
-    private void DeleteTag(Tag tag){
+    private void DeleteTag(Tag tag)
+    {
         Template.Tags.Remove(tag);
-        if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.SelectedTagName) || !Tags.Any(valid => valid.Name == t.SelectedTagName)))
+        if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.Name) || !Tags.Any(valid => valid.Name == t.Name)))
         {
             TagErrorMessage = "";
         }
     }
 
+    private async Task AddImage(Image image)
+    {
+        Template.Images.Add(image);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RemoveImage(Image image) => Template.Images.Remove(image);
+
     private void ValidateTag(Tag tag)
     {
-        var validTag = Tags.FirstOrDefault(t => t.Name == tag.SelectedTagName);
-        if (string.IsNullOrWhiteSpace(tag.SelectedTagName) || validTag == null || Template.Tags.Any(t => t.Id == validTag.Id))
+        var validTag = Tags.FirstOrDefault(t => t.Name == tag.Name);
+        if (string.IsNullOrWhiteSpace(tag.Name) || validTag == null || Template.Tags.Any(t => t.Id == validTag.Id))
         {
             tag.Id = 0;
             TagErrorMessage = "Invalid tag. Please select a valid tag from the list. No duplicates.";
             return;
         }
-        else{
+        else
+        {
             TagErrorMessage = "";
         }
-        tag.Id = validTag.Id;
-        tag.Name = validTag.Name;
-        tag.SelectedTagName = validTag.Name;
+        if (Tags.Find(t => t.Name == tag.Name) != null)
+        {
+            Template.Tags.Remove(tag);
+            Template.Tags.Add(Tags.Find(t => t.Name == tag.Name));
+        }
+
+
+        // tag.SelectedTagName = validTag.Name;
     }
 
     private async Task Save(MouseEventArgs e)

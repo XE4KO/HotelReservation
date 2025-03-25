@@ -23,7 +23,7 @@ namespace HotelReservation.Data
         //public DbSet<RoomTemplateToTag> RoomTemplatesTags{ get; set; } useless?
         public DbSet<Image> Images { get; set; }
         //public DbSet<Reservation> Reservations { get; set; }
-
+        
     }
  
 }

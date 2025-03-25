@@ -107,7 +107,7 @@
 		await RefreshTemplatesAsync();
 		await RefreshRoomsAsync();
 	}
-	private async Task EditRoomAsync(Room room)
+	private void EditRoomAsync(Room room)
 	{
 		if (_editingRoom && _editRoom == room)
 		{
@@ -119,7 +119,6 @@
 			_editingRoom = true;
 			_editRoom = room;
 		}
-		await DbContext.SaveChangesAsync();
-
+		StateHasChanged();
 	}
 }

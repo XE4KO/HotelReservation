@@ -16,7 +16,7 @@
 
     @if (_createRoomTemplate)
     {
-        <RoomTemplateComponent Template=@NewTemplate() Mode="Create" OnSave="AddRoomTemplateAsync" />
+        <RoomTemplateComponent Template=@NewTemplate() Tags="_allTags" Mode="Create" OnSave="AddRoomTemplateAsync" />
     }
     @if (_roomTemplates == null)
     {
@@ -33,7 +33,7 @@
                 </RoomTemplateOverview>
                 if (_editTemplate != null && template.Id == _editTemplate.Id)
                 {
-                    <RoomTemplateComponent Template=@_editTemplate Mode="Save" OnSave="UpdateRoomTemplateAsync" />
+                    <RoomTemplateComponent Template=@_editTemplate Tags="_allTags" Mode="Save" OnSave="UpdateRoomTemplateAsync" />
                 }
             }
         </div>
@@ -46,13 +46,15 @@
     bool _createRoomTemplate = false;
     RoomTemplate? _editTemplate;
     List<RoomTemplate> _roomTemplates = new();
-    private RoomTemplate NewTemplate() => new RoomTemplate() { Adults = 0, Name = "New_template", NightlyPrice = 0, Kids = 0, Tags = new List<Tag>() };
+    List<Tag> _allTags = new();
+    private RoomTemplate NewTemplate() => new RoomTemplate() { Adults = 0, Name = "New_template", NightlyPrice = 0, Kids = 0, Tags = new List<Tag>(), Images = new List<Image>() };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await RefreshTemplates();
+            _allTags = await DbContext.Tags.ToListAsync();
             StateHasChanged();
         }
         await base.OnInitializedAsync();
@@ -69,22 +71,26 @@
 
     protected async Task AddRoomTemplateAsync(RoomTemplate template)
     {
-        List<Tag> tagsToAttach = new();
-        foreach (var templateTag in template.Tags)
-        {
-            var localTag = DbContext.Tags.Local.FirstOrDefault(t => t.Id == templateTag.Id);
-            if (localTag != null)
-            {
-                tagsToAttach.Add(localTag);
-            }
-            else
-            {
-                var existingTag = await DbContext.Tags.AsNoTracking().FirstAsync(t => t.Id == templateTag.Id);
-                DbContext.Attach(existingTag);
-                tagsToAttach.Add(existingTag);
-            }
-        }
-        template.Tags = tagsToAttach;
+        // List<Tag> tagsToAttach = new();
+        // foreach (var templateTag in template.Tags)
+        // {
+        //     var localTag = DbContext.Tags.Local.FirstOrDefault(t => t.Id == templateTag.Id);
+        //     if (localTag != null)
+        //     {
+        //         tagsToAttach.Add(localTag);
+        //     }
+        //     else
+        //     {
+        //         var existingTag = await DbContext.Tags.AsNoTracking().FirstAsync(t => t.Id == templateTag.Id);
+        //         DbContext.Attach(existingTag);
+        //         tagsToAttach.Add(existingTag);
+        //     }
+        // }
+        // template.Tags = tagsToAttach;
+        // foreach (var tag in template.Tags)
+        // {
+        //     DbContext.Attach(tag);
+        // }
         await DbContext.RoomTemplates.AddAsync(template);
         await DbContext.SaveChangesAsync();
         await RefreshTemplates();
@@ -96,22 +102,22 @@
 
     protected async Task EditTemplate(RoomTemplate selectedTemplate)
     {
+        await DbContext.SaveChangesAsync();
         if (_editTemplate == selectedTemplate)
         {
             _editTemplate = null;
         }
         else
         {
-            _editTemplate = await DbContext.RoomTemplates.Include(template => template.Tags).FirstOrDefaultAsync(template => template.Id == selectedTemplate.Id);
+            _editTemplate = await DbContext.RoomTemplates.Include(template => template.Tags).Include(template => template.Images).FirstOrDefaultAsync(template => template.Id == selectedTemplate.Id);
             if (_editTemplate.Tags == null)
             {
                 _editTemplate.Tags = new List<Tag>();
             }
-            foreach (var tag in _editTemplate.Tags)
+            if (_editTemplate.Images == null)
             {
-                tag.SelectedTagName = tag.Name;
+                _editTemplate.Images = new List<Image>();
             }
-            StateHasChanged();
         }
         _createRoomTemplate = false;
     }
@@ -126,6 +132,7 @@
 
     protected async Task UpdateRoomTemplateAsync(RoomTemplate template)
     {
+
         DbContext.RoomTemplates.Update(template);
         await DbContext.SaveChangesAsync();
         _editTemplate = null;

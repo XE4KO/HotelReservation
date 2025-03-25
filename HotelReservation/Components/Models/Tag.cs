@@ -9,7 +9,6 @@ namespace HotelReservation.Components.Models
         [Key]
         public int Id { get; set; }
         public required string Name { get; set; }
-        [NotMapped] public string SelectedTagName { get; set; } = string.Empty;
         public IEnumerable<RoomTemplate>? Types { get; set; }
     }
 }

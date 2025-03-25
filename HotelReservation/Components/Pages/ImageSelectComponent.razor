@@ -1,0 +1,58 @@
+﻿@using HotelReservation.Components.Models
+@using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@inject ApplicationDbContext DbContext;
+
+<div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select an Image</h5>
+                <button type="button" class="close" @onclick="Cancel">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex flex-wrap">
+                    @foreach (var image in AllImages)
+                    {
+                        <img src="@image.Path"
+                        alt="Image"
+                        style="cursor:pointer; 
+                                   border:@(selectedImage == image ? "3px solid blue" : "1px solid gray"); 
+                                   margin:5px; width:100px; height:100px;"
+                        @onclick="() => selectedImage = image" />
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">Done</button>
+                <button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<Image> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public ICollection<Image> CurrentImages { get; set; }
+    public List<Image> AllImages = new();
+    private Image? selectedImage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllImages = DbContext.Images.Where(img => !CurrentImages.Contains(img)).ToList();
+        await base.OnInitializedAsync();
+    }
+    private async Task Save(MouseEventArgs e)
+    {
+        AllImages.Remove(selectedImage);
+        await OnSave.InvokeAsync(selectedImage);
+    }
+    private async Task Cancel(MouseEventArgs? e)
+    {
+        await OnCancel.InvokeAsync();
+    }
+}
