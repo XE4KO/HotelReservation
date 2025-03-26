@@ -26,22 +26,20 @@
         <label>Tags</label>
         @foreach (var templateTag in Template.Tags)
         {
-            <div @key="templateTag">
-                <input type="text" list="tagList" id="tags" placeholder="Select/Search Tag"
-                @bind="templateTag.Name"
-                @bind:after="() => ValidateTag(templateTag)" />
-                <button type="button" @onclick="@(() => DeleteTag(templateTag))">&#x2716;</button>
+            <div>
+                @templateTag.Name
+                <button type="button" @onclick=@(() => DeleteTag(templateTag))>&#x2716;</button>
             </div>
         }
-        <div>
-            <button type="button" @onclick="AddTag" id="newTag" disabled="@InvalidTag">Add New Tag</button>
-        </div>
-        <datalist id="tagList">
-            @foreach (var tag in Tags)
-            {
-                <option value="@tag.Name"></option>
-            }
-        </datalist>
+            <div>
+                <select type="text" id="new-tag" @bind="_newTag.Name" @bind:after="SaveTag">
+                    <option value="">-- Add New Tag --</option>
+                    @foreach (var tag in _tags)
+                    {
+                        <option value="@tag.Name">@tag.Name</option>
+                    }
+                </select>
+            </div>
         @if (!string.IsNullOrEmpty(TagErrorMessage))
         {
             <div class="text-danger">@TagErrorMessage</div>
@@ -49,10 +47,10 @@
     </div>
 
     <div>
-        <button type="button" @onclick="() => isModalOpen = true">Select Image</button>
-        @if (isModalOpen)
+        <button type="button" @onclick="() => _imageSelection = true">Select Image</button>
+        @if (_imageSelection)
         {
-            <ImageSelectComponent OnSave="AddImage" OnCancel="() => isModalOpen = false" CurrentImages="Template.Images" />
+            <ImageSelectComponent OnSave="AddImage" OnCancel="() => _imageSelection = false" CurrentImages="Template.Images" />
         }
         @foreach (var image in Template.Images)
         {
@@ -74,35 +72,48 @@
 
 @code {
     [Parameter] public required RoomTemplate Template { get; set; }
-    [Parameter] public required List<Tag> Tags { get; set; }
+    [Parameter] public Func<Task<List<Tag>>> Tags { get; set; }
     [Parameter] public required string? Mode { get; set; }
     [Parameter] public EventCallback<RoomTemplate> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
-    private bool isModalOpen = false;
+    private List<Tag> _tags = new();
+    private Tag? _newTag = new Tag { Name = "" };
+    private bool _imageSelection = false;
     private string TagErrorMessage = "";
     private bool InvalidTag => !string.IsNullOrEmpty(TagErrorMessage);
 
     protected override async Task OnInitializedAsync()
     {
-        // foreach (var templateTag in Template.Tags)
-        // {
-        //     templateTag.SelectedTagName = templateTag.Name;
-        // }
-    }
-
-    private void AddTag()
-    {
-        TagErrorMessage = "Please enter a tag.";
-        Template.Tags.Add(new Tag { Name = "" });
+        _tags = await Tags.Invoke();
+        foreach (var templateTag in Template.Tags)
+        {
+            _tags.Remove(templateTag);
+        }
     }
 
     private void DeleteTag(Tag tag)
     {
         Template.Tags.Remove(tag);
-        if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.Name) || !Tags.Any(valid => valid.Name == t.Name)))
+        _tags.Add(tag);
+        if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.Name) || !_tags.Any(valid => valid.Name == t.Name)))
         {
             TagErrorMessage = "";
         }
+    }
+    private void SaveTag()
+    {
+        if (_newTag == null || string.IsNullOrEmpty(_newTag.Name))
+        {
+            TagErrorMessage = "Please enter a tag.";
+        }else
+        {
+            _newTag = _tags.Find(t => t.Name == _newTag.Name);
+            Template.Tags.Add(_newTag);
+            _tags.Remove(_newTag);
+            TagErrorMessage = "";
+            _newTag = new Tag { Name = "" };
+        }
+
     }
 
     private async Task AddImage(Image image)
@@ -115,7 +126,7 @@
 
     private void ValidateTag(Tag tag)
     {
-        var validTag = Tags.FirstOrDefault(t => t.Name == tag.Name);
+        var validTag = _tags.FirstOrDefault(t => t.Name == tag.Name);
         if (string.IsNullOrWhiteSpace(tag.Name) || validTag == null || Template.Tags.Any(t => t.Id == validTag.Id))
         {
             tag.Id = 0;
@@ -126,13 +137,6 @@
         {
             TagErrorMessage = "";
         }
-        if (Tags.Find(t => t.Name == tag.Name) != null)
-        {
-            Template.Tags.Remove(tag);
-            Template.Tags.Add(Tags.Find(t => t.Name == tag.Name));
-        }
-
-
         // tag.SelectedTagName = validTag.Name;
     }
 

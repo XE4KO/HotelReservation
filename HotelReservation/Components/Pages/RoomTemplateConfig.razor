@@ -17,7 +17,7 @@
 
         @if (_createRoomTemplate)
         {
-            <RoomTemplateComponent Template=@NewTemplate() Tags="_allTags" Mode="Create" OnSave="AddRoomTemplateAsync" />
+            <RoomTemplateComponent Template=@NewTemplate() Tags="AllTags" Mode="Create" OnSave="AddRoomTemplateAsync" />
         }
         @if (_roomTemplates == null)
         {
@@ -34,7 +34,7 @@
                     </RoomTemplateOverview>
                     if (_editTemplate != null && template.Id == _editTemplate.Id)
                     {
-                        <RoomTemplateComponent Template=@_editTemplate Tags="_allTags" Mode="Save" OnSave="UpdateRoomTemplateAsync" />
+                        <RoomTemplateComponent Template=@_editTemplate Tags="AllTags" Mode="Save" OnSave="UpdateRoomTemplateAsync" />
                     }
                 }
             </div>
@@ -49,7 +49,7 @@
     bool _createRoomTemplate = false;
     RoomTemplate? _editTemplate;
     List<RoomTemplate> _roomTemplates = new();
-    List<Tag> _allTags = new();
+    private async Task<List<Tag>> AllTags() => await DbContext.Tags.ToListAsync();
     private RoomTemplate NewTemplate() => new RoomTemplate() { Adults = 0, Name = "New_template", NightlyPrice = 0, Kids = 0, Tags = new List<Tag>(), Images = new List<Image>() };
     private bool _isLoading = true;
 
@@ -58,7 +58,6 @@
         if (firstRender)
         {
             await RefreshTemplates();
-            _allTags = await DbContext.Tags.ToListAsync();
             _isLoading = false;
             StateHasChanged();
         }
