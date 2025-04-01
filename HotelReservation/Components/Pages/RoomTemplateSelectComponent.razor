@@ -19,9 +19,6 @@
     [Parameter] public EventCallback<RoomTemplate> OnChange { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    protected override void OnInitialized()
-    {
-    }
     private async Task ChangeTemplate(ChangeEventArgs args){
         if (int.TryParse((string)args.Value, out var templateId))
             await OnChange.InvokeAsync(RoomTemplates.Single(x => x.Id == templateId));

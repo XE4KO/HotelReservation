@@ -9,13 +9,13 @@
     <InputFile id="image" OnChange="@UpdateImagePath" MaxFileSize="10485760" style="color:transparent" accept=".JPG, .JPEG, .JPE, .BMP, .GIF, .PNG" required />
 </div>
 <div>
-    @if (SelectedFile != null && !string.IsNullOrEmpty(SelectedFile.Name))
+    @if (selectedFile != null && !string.IsNullOrEmpty(selectedFile.Name))
     {
-        <p>Selected File: @SelectedFile.Name</p>
+        <p>Selected File: @selectedFile.Name</p>
     }
-    @if (!string.IsNullOrEmpty(ErrorMessage))
+    @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <p style="color: red;">@ErrorMessage</p>
+        <p style="color: red;">@errorMessage</p>
     }
 </div>
 <div>
@@ -31,41 +31,41 @@
 @code {
     [Parameter] public required Image Image { get; set; }
     [Parameter] public EventCallback<Image> OnSave { get; set; }
-    private readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".bmp", ".gif", ".png" };
-    private IBrowserFile? SelectedFile;
-    private string FilePath = "";
-    private string FileName = "";
-    private string ErrorMessage = "Please select an image.";
+    private readonly string[] allowedExtensions = { ".jpg", ".jpeg", ".bmp", ".gif", ".png" };
+    private IBrowserFile? selectedFile;
+    private string filePath = "";
+    private string fileName = "";
+    private string errorMessage = "Please select an image.";
 
-    private bool InvalidImage => !string.IsNullOrEmpty(ErrorMessage);
+    private bool InvalidImage => !string.IsNullOrEmpty(errorMessage);
     private async Task UpdateImagePath(InputFileChangeEventArgs e)
     {
-        if (!string.IsNullOrEmpty(FilePath))
+        if (!string.IsNullOrEmpty(filePath))
         {
-            File.Delete(FilePath);
+            File.Delete(filePath);
         }
-        SelectedFile = e.File;
+        selectedFile = e.File;
 
-        if (SelectedFile != null)
+        if (selectedFile != null)
         {
-            ErrorMessage = "";  
-            var extension = Path.GetExtension(SelectedFile.Name).ToLower();
-            if (!AllowedExtensions.Contains(extension))
+            errorMessage = "";  
+            var extension = Path.GetExtension(selectedFile.Name).ToLower();
+            if (!allowedExtensions.Contains(extension))
             {
-                ErrorMessage = "Invalid file type. Please select an image file: .jpg, .jpeg, .bmp, .gif or .png.";
+                errorMessage = "Invalid file type. Please select an image file: .jpg, .jpeg, .bmp, .gif or .png.";
                 return;
             }
             var uploadsFolder = Path.Combine(Env.WebRootPath, "images");
-            FileName = Guid.NewGuid().ToString() + Path.GetExtension(SelectedFile.Name);
-            FilePath = Path.Combine(uploadsFolder, FileName);
+            fileName = Guid.NewGuid().ToString() + Path.GetExtension(selectedFile.Name);
+            filePath = Path.Combine(uploadsFolder, fileName);
 
-            await using var createStream = new FileStream(FilePath, FileMode.Create);
-            await SelectedFile.OpenReadStream(10485760).CopyToAsync(createStream);
+            await using var createStream = new FileStream(filePath, FileMode.Create);
+            await selectedFile.OpenReadStream(10485760).CopyToAsync(createStream);
 
-            Image.Path = $"/images/{FileName}";
+            Image.Path = $"/images/{fileName}";
         }else
         {
-            ErrorMessage = "Please select an image.";
+            errorMessage = "Please select an image.";
         }
     }
     private async Task Save(MouseEventArgs e)
@@ -73,9 +73,9 @@
         if (!string.IsNullOrEmpty(Image.Path))
         {
             await OnSave.InvokeAsync(Image);
-            SelectedFile = null;
-            FilePath = "";
-            ErrorMessage = "Please select an image.";
+            selectedFile = null;
+            filePath = "";
+            errorMessage = "Please select an image.";
         }
     }
 

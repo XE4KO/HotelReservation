@@ -7,22 +7,22 @@
 
 <h3>Rooms</h3>
 <br>
-@if (!_isLoading)
+@if (!isLoading)
 {
-<RoomTemplateSelectComponent OnChange="x => _selectedTemplate = x" RoomTemplates="_roomTemplates">
+<RoomTemplateSelectComponent OnChange="x => selectedTemplate = x" RoomTemplates="roomTemplates">
 	<label for="type">Type</label>
 </RoomTemplateSelectComponent>
 <button @onclick="() => AddNewFloorAsync()">Floor+</button>
-@foreach (var floor in _rooms)
+@foreach (var floor in rooms)
 {
 	<div>
 		<span>|</span><label>@floor.Key</label><span>|</span>
 		@foreach (var room in floor)
 		{
-			if (_editingRoom && _editRoom == room)
+			if (editingRoom && editRoom == room)
 			{
 				<input @bind-value="room.Number" />
-				<RoomTemplateSelectComponent OnChange="x => room.Type = x" RoomTemplates="_roomTemplates" />
+				<RoomTemplateSelectComponent OnChange="x => room.Type = x" RoomTemplates="roomTemplates" />
 			}else
 			{
 				<label>@room.Number</label>
@@ -40,31 +40,31 @@
 }
 
 @code {
-	private bool _editingRoom;
-	private Room? _editRoom;
-	private List<RoomTemplate> _roomTemplates = new();
-	private RoomTemplate? _selectedTemplate;
-	private List<IGrouping<int, Room>> _rooms = new();
-	private bool _isLoading = true;
+	private bool editingRoom;
+	private Room? editRoom;
+	private List<RoomTemplate> roomTemplates = new();
+	private RoomTemplate? selectedTemplate;
+	private List<IGrouping<int, Room>> rooms = new();
+	private bool isLoading = true;
 
-	private async Task<Room> NewFloorRoomAsync()
-	{
-		int newFloor = await GetNewFloorAsync();
-		return new Room { Floor = newFloor, Number = 1, Type = _selectedTemplate};
-	}
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
 			await RefreshAsync();
-			_isLoading = false;
+			isLoading = false;
 			StateHasChanged();
 		}
 		await base.OnAfterRenderAsync(firstRender);
 	}
+	private async Task<Room> NewFloorRoomAsync()
+	{
+		int newFloor = await GetNewFloorAsync();
+		return new Room { Floor = newFloor, Number = 1, Type = selectedTemplate };
+	}
 	private async Task RefreshRoomsAsync()
 	{
-		_rooms = await DbContext.Rooms
+		rooms = await DbContext.Rooms
 			.OrderBy(room => room.Floor)
 			.ThenBy(room => room.Number)
 			.GroupBy(room => room.Floor)
@@ -97,7 +97,7 @@
 	private async Task AddNewRoomAsync(int floor)
 	{
 		int newNumber = await GetNewRoomNumberAsync(floor);
-		await AddRoomAsync(new Room() { Floor = floor, Number = newNumber, Type = _selectedTemplate });
+		await AddRoomAsync(new Room() { Floor = floor, Number = newNumber, Type = selectedTemplate });
 		await RefreshAsync();
 	}
 	private async Task AddRoomAsync(Room room)
@@ -107,7 +107,7 @@
 		await RefreshAsync();
 	}
 	private async Task RefreshTemplatesAsync()
-		=> _roomTemplates = await GetAllRoomTemplatesAsync();
+		=> roomTemplates = await GetAllRoomTemplatesAsync();
 	private Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
 		=> DbContext.RoomTemplates.ToListAsync();
 	private async Task RefreshAsync(){
@@ -116,15 +116,15 @@
 	}
 	private void EditRoomAsync(Room room)
 	{
-		if (_editingRoom && _editRoom == room)
+		if (editingRoom && editRoom == room)
 		{
-			_editingRoom = false;
-			_editRoom = null;
+			editingRoom = false;
+			editRoom = null;
 
 		}else
 		{
-			_editingRoom = true;
-			_editRoom = room;
+			editingRoom = true;
+			editRoom = room;
 		}
 		StateHasChanged();
 	}

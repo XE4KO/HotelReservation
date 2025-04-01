@@ -32,25 +32,25 @@
             </div>
         }
             <div>
-                <select type="text" id="new-tag" @bind="_newTag.Name" @bind:after="SaveTag">
+                <select type="text" id="new-tag" @bind="newTag.Name" @bind:after="SaveTag">
                     <option value="">-- Add New Tag --</option>
-                    @foreach (var tag in _tags)
+                    @foreach (var tag in tags)
                     {
                         <option value="@tag.Name">@tag.Name</option>
                     }
                 </select>
             </div>
-        @if (!string.IsNullOrEmpty(TagErrorMessage))
+        @if (!string.IsNullOrEmpty(tagErrorMessage))
         {
-            <div class="text-danger">@TagErrorMessage</div>
+            <div class="text-danger">@tagErrorMessage</div>
         }
     </div>
 
     <div>
-        <button type="button" @onclick="() => _imageSelection = true">Select Image</button>
-        @if (_imageSelection)
+        <button type="button" @onclick="() => imageSelection = true">Select Image</button>
+        @if (imageSelection)
         {
-            <ImageSelectComponent OnSave="AddImage" OnCancel="() => _imageSelection = false" CurrentImages="Template.Images" />
+            <ImageSelectComponent OnSave="AddImage" OnCancel="() => imageSelection = false" CurrentImages="Template.Images" />
         }
         @foreach (var image in Template.Images)
         {
@@ -66,7 +66,7 @@
     </div>
     @if (Mode != null)
     {
-        <input type="button" @onclick="Save" id="submit" value="@Mode" disabled="@InvalidTag" />
+        <input type="button" @onclick="Save" id="submit" value="@Mode" disabled="@invalidTag" />
     }
 </form>
 
@@ -76,42 +76,42 @@
     [Parameter] public required string? Mode { get; set; }
     [Parameter] public EventCallback<RoomTemplate> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
-    private List<Tag> _tags = new();
-    private Tag? _newTag = new Tag { Name = "" };
-    private bool _imageSelection = false;
-    private string TagErrorMessage = "";
-    private bool InvalidTag => !string.IsNullOrEmpty(TagErrorMessage);
+    private List<Tag> tags = new();
+    private Tag? newTag = new Tag { Name = "" };
+    private bool imageSelection = false;
+    private string tagErrorMessage = "";
+    private bool invalidTag => !string.IsNullOrEmpty(tagErrorMessage);
 
     protected override async Task OnInitializedAsync()
     {
-        _tags = await Tags.Invoke();
+        tags = await Tags.Invoke();
         foreach (var templateTag in Template.Tags)
         {
-            _tags.Remove(templateTag);
+            tags.Remove(templateTag);
         }
     }
 
     private void DeleteTag(Tag tag)
     {
         Template.Tags.Remove(tag);
-        _tags.Add(tag);
-        if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.Name) || !_tags.Any(valid => valid.Name == t.Name)))
+        tags.Add(tag);
+        if (!Template.Tags.Any(t => string.IsNullOrWhiteSpace(t.Name) || !tags.Any(valid => valid.Name == t.Name)))
         {
-            TagErrorMessage = "";
+            tagErrorMessage = "";
         }
     }
     private void SaveTag()
     {
-        if (_newTag == null || string.IsNullOrEmpty(_newTag.Name))
+        if (newTag == null || string.IsNullOrEmpty(newTag.Name))
         {
-            TagErrorMessage = "Please enter a tag.";
+            tagErrorMessage = "Please enter a tag.";
         }else
         {
-            _newTag = _tags.Find(t => t.Name == _newTag.Name);
-            Template.Tags.Add(_newTag);
-            _tags.Remove(_newTag);
-            TagErrorMessage = "";
-            _newTag = new Tag { Name = "" };
+            newTag = tags.Find(t => t.Name == newTag.Name);
+            Template.Tags.Add(newTag);
+            tags.Remove(newTag);
+            tagErrorMessage = "";
+            newTag = new Tag { Name = "" };
         }
 
     }
@@ -126,16 +126,16 @@
 
     private void ValidateTag(Tag tag)
     {
-        var validTag = _tags.FirstOrDefault(t => t.Name == tag.Name);
+        var validTag = tags.FirstOrDefault(t => t.Name == tag.Name);
         if (string.IsNullOrWhiteSpace(tag.Name) || validTag == null || Template.Tags.Any(t => t.Id == validTag.Id))
         {
             tag.Id = 0;
-            TagErrorMessage = "Invalid tag. Please select a valid tag from the list. No duplicates.";
+            tagErrorMessage = "Invalid tag. Please select a valid tag from the list. No duplicates.";
             return;
         }
         else
         {
-            TagErrorMessage = "";
+            tagErrorMessage = "";
         }
         // tag.SelectedTagName = validTag.Name;
     }

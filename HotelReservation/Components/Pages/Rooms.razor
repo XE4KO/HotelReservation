@@ -1,0 +1,26 @@
+﻿@page "/rooms"
+@using HotelReservation.Components.Models
+@using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext;
+
+<h3>Rooms</h3>
+
+@foreach (var roomType in _roomTypes)
+{
+	<div>
+		<ImageCarousel Images="roomType.Images.ToList()" />
+		@roomType.Name
+		Kids:@roomType.Kids
+		Adults:@roomType.Adults
+	</div>
+}
+
+@code {
+	private List<RoomTemplate>? _roomTypes = new();
+
+	protected override async Task OnInitializedAsync(){
+		_roomTypes = await DbContext.RoomTemplates.Include(t => t.Images).ToListAsync();
+		await base.OnInitializedAsync();
+	}
+}

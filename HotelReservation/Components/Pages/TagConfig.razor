@@ -7,11 +7,11 @@
 
 <h3>Tags</h3>
 <br>
-@if (!_isLoading)
+@if (!isLoading)
 {
 <TagComponent NewTag="NewTag()" OnSave="NewTagAsync"/>
 <div>
-    @foreach (var tag in Tags)
+    @foreach (var tag in tags)
     {
         <div>
             @tag.Name
@@ -25,20 +25,20 @@
 
 @code {
     private Tag NewTag() => new Tag() {Name = ""};
-    private List<Tag> Tags = new();
-    private bool _isLoading = true;
+    private List<Tag> tags = new();
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        Tags = await DbContext.Tags.ToListAsync();
-        _isLoading = false;
+        tags = await DbContext.Tags.ToListAsync();
+        isLoading = false;
     }
 
     private async Task DeleteTagAsync(Tag tag)
     {
         DbContext.Tags.Remove(tag);
         await DbContext.SaveChangesAsync();
-        Tags.Remove(tag);
+        tags.Remove(tag);
         StateHasChanged();
     }
 
@@ -46,7 +46,7 @@
     {
         await DbContext.Tags.AddAsync(tag);
         await DbContext.SaveChangesAsync();
-        Tags.Add(tag);
+        tags.Add(tag);
         StateHasChanged();
     }
 }

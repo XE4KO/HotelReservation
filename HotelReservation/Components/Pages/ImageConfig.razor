@@ -8,11 +8,11 @@
 
 <h3>Images</h3>
 <br>
-@if (!_isLoading)
+@if (!isLoading)
 {
 	<ImageComponent OnSave="AddImageAsync" Image="NewImage()"/>
 	<div>
-		@foreach (var image in SavedImages)
+		@foreach (var image in savedImages)
 		{
 			<div>
 				<img src="@image.Path" width="250" height="250"/>
@@ -26,25 +26,25 @@
 
 @code {
 	private Image NewImage() => new Image() {Path=""};
-	private List<Image> SavedImages = new();
-	private bool _isLoading = true;
+	private List<Image> savedImages = new();
+	private bool isLoading = true;
 
 	protected override async Task OnInitializedAsync()
 	{
-		SavedImages = await DbContext.Images.ToListAsync();
-		_isLoading = false;
+		savedImages = await DbContext.Images.ToListAsync();
+		isLoading = false;
 	}
 	private async Task AddImageAsync(Image image){
 		await DbContext.Images.AddAsync(image);
 		await DbContext.SaveChangesAsync();
-		SavedImages.Add(image);
+		savedImages.Add(image);
 		StateHasChanged();
 	}
 	private async Task DeleteImageAsync(Image image){
 		File.Delete($"{Env.WebRootPath}{image.Path}");
 		DbContext.Images.Remove(image);
 		await DbContext.SaveChangesAsync();
-		SavedImages.Remove(image);
+		savedImages.Remove(image);
 		StateHasChanged();
 	}
 }

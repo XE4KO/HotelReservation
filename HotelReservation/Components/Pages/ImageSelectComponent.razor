@@ -15,7 +15,7 @@
             </div>
             <div class="modal-body">
                 <div class="d-flex flex-wrap">
-                    @foreach (var image in AllImages)
+                    @foreach (var image in allImages)
                     {
                         <img src="@image.Path"
                         alt="Image"
@@ -38,17 +38,17 @@
     [Parameter] public EventCallback<Image> OnSave { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public ICollection<Image> CurrentImages { get; set; }
-    public List<Image> AllImages = new();
+    private List<Image> allImages = new();
     private Image? selectedImage;
 
     protected override async Task OnInitializedAsync()
     {
-        AllImages = DbContext.Images.Where(img => !CurrentImages.Contains(img)).ToList();
+        allImages = DbContext.Images.Where(img => !CurrentImages.Contains(img)).ToList();
         await base.OnInitializedAsync();
     }
     private async Task Save(MouseEventArgs e)
     {
-        AllImages.Remove(selectedImage);
+        allImages.Remove(selectedImage);
         await OnSave.InvokeAsync(selectedImage);
     }
     private async Task Cancel(MouseEventArgs? e)
