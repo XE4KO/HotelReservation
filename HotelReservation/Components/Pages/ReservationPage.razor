@@ -1,0 +1,184 @@
+﻿@page "/reservation"
+@rendermode InteractiveServer
+@using HotelReservation.Components.Models
+@using HotelReservation.Data
+@using Microsoft.AspNetCore.Identity
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext;
+
+<h3>Make a Reservation</h3>
+
+<div style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <button @onclick="() => ToggleReservation(true)" disabled="@reservingForSelf">Reserve for Yourself</button>
+    <button @onclick="() => ToggleReservation(false)" disabled="@( !reservingForSelf )">Reserve for Someone Else</button>
+</div>
+
+@if (!isConfirming)
+{
+    @if (isAuthenticated && reservingForSelf)
+    {
+        <p>Logged in as: @userName</p>
+        <p>Email: @userEmail</p>
+        <p>Phone: @userPhone</p>
+
+        <label>Special Requests (Optional):</label>
+        <textarea @bind="requestMessage"></textarea>
+
+        <button @onclick="ShowConfirmation">Confirm Reservation</button>
+    }
+    else if (!isAuthenticated && reservingForSelf)
+    {
+        <p>Please <a href="Account/Login">log in</a> to make a reservation for yourself.</p>
+    }
+    else
+    {
+        <label>Name:</label>
+        <input type="text" @bind-value="guestName" required />
+
+        <label>Email:</label>
+        <input type="email" @bind-value="guestEmail" required />
+
+        <label>Phone:</label>
+        <input type="tel" @bind-value="guestPhone" required />
+
+        <label>Special Requests (Optional):</label>
+        <textarea @bind="requestMessage"></textarea>
+
+        <button @onclick="ShowConfirmation">Confirm Reservation</button>
+    }
+}
+else
+{
+    <h4>Please confirm your reservation:</h4>
+    <p><strong>Room ID:</strong> @roomId</p>
+    <p><strong>Adults:</strong> @adults</p>
+    <p><strong>Kids:</strong> @kids</p>
+    <p><strong>From:</strong> @reservationStart.ToShortDateString()</p>
+    <p><strong>To:</strong> @reservationEnd.ToShortDateString()</p>
+
+    @if (reservingForSelf)
+    {
+        <p><strong>Name:</strong> @userName</p>
+        <p><strong>Email:</strong> @userEmail</p>
+        <p><strong>Phone:</strong> @userPhone</p>
+    }
+    else
+    {
+        <p><strong>Name:</strong> @guestName</p>
+        <p><strong>Email:</strong> @guestEmail</p>
+        <p><strong>Phone:</strong> @guestPhone</p>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(requestMessage))
+    {
+        <p><strong>Special Requests:</strong> @requestMessage</p>
+    }
+
+    <div style="margin-top: 1rem;">
+        <button @onclick="ConfirmReservationAsync">Yes, everything is correct</button>
+        <button style="margin-left: 1rem;" @onclick="() => isConfirming = false">Go Back</button>
+    </div>
+}
+
+@code {
+    private int roomId;
+    private int adults;
+    private int kids;
+    private DateTime reservationStart;
+    private DateTime reservationEnd;
+
+    private bool isAuthenticated;
+    private bool reservingForSelf = true;
+    private bool isConfirming = false;
+
+    private string? userName;
+    private string? userEmail;
+    private string? userPhone;
+
+    private string guestName = "";
+    private string guestEmail = "";
+    private string guestPhone = "";
+    private string requestMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        roomId = int.Parse(query.Get("room"));
+        adults = int.Parse(query.Get("adults"));
+        kids = int.Parse(query.Get("kids"));
+        reservationStart = DateTime.Parse(query.Get("start"));
+        reservationEnd = DateTime.Parse(query.Get("end"));
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        isAuthenticated = user.Identity?.IsAuthenticated == true;
+
+        if (isAuthenticated)
+        {
+            var appUser = await UserManager.GetUserAsync(user);
+            userName = appUser?.UserName;
+            userEmail = appUser?.Email;
+            userPhone = appUser?.PhoneNumber;
+        }
+    }
+
+    private void ToggleReservation(bool forSelf)
+    {
+
+        reservingForSelf = forSelf;
+    }
+
+    private void ShowConfirmation()
+    {
+        if (reservingForSelf && !isAuthenticated)
+        {
+            Navigation.NavigateTo("Account/Login");
+            return;
+        }
+
+        isConfirming = true;
+    }
+
+    private async Task ConfirmReservationAsync()
+    {
+        if (isAuthenticated && reservingForSelf)
+        {
+            await DbContext.Reservations.AddAsync(new Reservation()
+            {
+                Room = DbContext.Rooms.First(r => r.Id == roomId),
+                UserName = userName,
+                UserEmail = userEmail,
+                UserPhone = userPhone,
+                Begin = reservationStart,
+                End = reservationEnd,
+                AdultsNumber = adults,
+                ChildrenNumber = kids,
+                Request = requestMessage
+            });
+        }else if (!reservingForSelf)
+        {
+            await DbContext.Reservations.AddAsync(new Reservation()
+            {
+                Room = DbContext.Rooms.First(r => r.Id == roomId),
+                UserName = guestName,
+                UserEmail = guestEmail,
+                UserPhone = guestPhone,
+                Begin = reservationStart,
+                End = reservationEnd,
+                AdultsNumber = adults,
+                ChildrenNumber = kids,
+                Request = requestMessage
+            });
+        }else
+        {
+            return;
+        }
+        await DbContext.SaveChangesAsync();
+        Navigation.NavigateTo("");
+    }
+}

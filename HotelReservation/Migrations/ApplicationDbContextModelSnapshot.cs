@@ -39,6 +39,51 @@ namespace HotelReservation.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("HotelReservation.Components.Models.Reservation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdultsNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Begin")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("ChildrenNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Request")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserPhone")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("Reservations");
+                });
+
             modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
                 {
                     b.Property<int>("Id")
@@ -128,6 +173,11 @@ namespace HotelReservation.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -140,7 +190,7 @@ namespace HotelReservation.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("varchar(256) COLLATE utf8mb4_bin");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
@@ -335,6 +385,17 @@ namespace HotelReservation.Migrations
                     b.ToTable("RoomTemplateTag");
                 });
 
+            modelBuilder.Entity("HotelReservation.Components.Models.Reservation", b =>
+                {
+                    b.HasOne("HotelReservation.Components.Models.Room", "Room")
+                        .WithMany("Reservations")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
             modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
                 {
                     b.HasOne("HotelReservation.Components.Models.RoomTemplate", "Type")
@@ -425,6 +486,11 @@ namespace HotelReservation.Migrations
                         .HasForeignKey("TypesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("HotelReservation.Components.Models.Room", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("HotelReservation.Components.Models.RoomTemplate", b =>

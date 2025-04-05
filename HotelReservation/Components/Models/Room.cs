@@ -12,11 +12,9 @@ namespace HotelReservation.Components.Models
         public int Id { get; set; }
         public int TypeId { get; set; }
         public RoomTemplate? Type { get; set; }
-
         public required int Floor { get; set; }
-
         public required int Number { get; set; }
-        //public IEnumerable<Reservation> Reservations { get; set; }
+        public IEnumerable<Reservation>? Reservations { get; set; }
     }
 
 }

@@ -1,14 +1,12 @@
 ﻿@rendermode InteractiveServer
 @using HotelReservation.Components.Models
 
-<div class="image-container">
-    @if (Images != null && Images.Count() > 0)
-    {
-        <button type="button" @onclick="PrevImage">⬅️</button>
-        <img src="@Images[currentIndex].Path" alt="Image" class="carousel-image" width="100" height="100" />
-        <button type="button" @onclick="NextImage">➡️</button>
+@if (Images != null && Images.Count() > 0)
+{
+    <button type="button" @onclick="PrevImage">⬅️</button>
+    <img src="@Images[currentIndex].Path" alt="Image" class="carousel-image" width="100" height="100" />
+    <button type="button" @onclick="NextImage">➡️</button>
     }
-</div>
 
 @code {
     [Parameter] public List<Image>? Images { get; set; }

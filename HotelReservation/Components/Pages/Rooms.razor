@@ -1,26 +1,77 @@
 ﻿@page "/rooms"
+@rendermode InteractiveServer
 @using HotelReservation.Components.Models
 @using HotelReservation.Data
 @using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext DbContext;
+@inject NavigationManager Navigation
 
 <h3>Rooms</h3>
 
-@foreach (var roomType in _roomTypes)
+<div>
+	<label for="adults">Adults</label>
+	<input type="number" id="adults" @bind-value="adultsFilter" min="0" />
+	<label for="kids">Kids</label>
+	<input type="number" id="kids" @bind-value="kidsFilter" min="0" />
+	<label for="reservation-start">From</label>
+	<input type="date" id="reservation-start" @bind-value="reservationBegin" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+	<label for="reservation-end">Until</label>
+	<input type="date" id="reservation-end" @bind-value="reservationEnd" min="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" />
+	<button type="button" @onclick="() => Filter()">Search</button>
+</div>
+
+@foreach (var room in filteredRooms)
 {
 	<div>
-		<ImageCarousel Images="roomType.Images.ToList()" />
-		@roomType.Name
-		Kids:@roomType.Kids
-		Adults:@roomType.Adults
+		<ImageCarousel Images="room.Images.ToList()" />
+		@room.Name
+		Adult Beds:@room.Adults
+		Kid Beds:@room.Kids
+		@foreach (var tag in room.Tags)
+		{
+			<text>
+				&#32;@tag.Name
+			</text>
+		}
+		<button type="button" @onclick="() => SelectRoom(room.Id, adultsFilter, kidsFilter, reservationBegin, reservationEnd)">Reserve Now</button>
 	</div>
 }
 
 @code {
-	private List<RoomTemplate>? _roomTypes = new();
+	private List<RoomTemplate>? roomTypes = new();
+	private List<RoomTemplate>? filteredRooms = new();
+	private int adultsFilter;
+	private int kidsFilter;
+	private DateTime reservationBegin = DateTime.Today.AddDays(1);
+	private DateTime reservationEnd = DateTime.Today.AddDays(2);
 
-	protected override async Task OnInitializedAsync(){
-		_roomTypes = await DbContext.RoomTemplates.Include(t => t.Images).ToListAsync();
+	protected override async Task OnInitializedAsync()
+	{
+		roomTypes = await DbContext.RoomTemplates
+		.Include(t => t.Tags)
+		.Include(t => t.Images)
+		.Include(t => t.Rooms)
+		.ToListAsync();
 		await base.OnInitializedAsync();
+	}
+
+	private void Filter()
+	{
+		if (adultsFilter > 0 && roomTypes.Any(t => t.Rooms != null && t.Rooms.Count() > 0))
+		{
+			filteredRooms = roomTypes.FindAll(t => t.Adults - adultsFilter >= 0 && t.Kids + t.Adults - (kidsFilter + adultsFilter) >= 0);
+
+			//filteredRooms = filteredRooms.FindAll(t => t.Rooms.Any(r => r.Reservations.FirstOrDefault(res => (reservationBegin > res.Begin && reservationBegin < res.End) || (reservationEnd > res.Begin && reservationEnd < res.End)) != null));
+		}
+		else
+		{
+			filteredRooms = new();
+		}
+	}
+
+	private void SelectRoom(int roomId, int adults, int kids, DateTime start, DateTime end)
+	{
+		string url = $"/reservation?room={roomId}&adults={adults}&kids={kids}&start={start:yyyy-MM-dd}&end={end:yyyy-MM-dd}";
+		Navigation.NavigateTo(url);
 	}
 }
