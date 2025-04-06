@@ -44,7 +44,7 @@
         var user = await UserManager.FindByEmailAsync(Input.Email!);
         if (user is null)
         {
-            message = "User doesn't exist";
+            message = "This account doesn't exist.";
             return;
         }
 

@@ -7,11 +7,11 @@ namespace HotelReservation.Components.Models
 {
     public class Image
     {
-            [Key]
-            public int Id { get; set; }
-            public required string Path { get; set; }
-            [JsonIgnore]
-            public IEnumerable<RoomTemplate>? Templates { get; set; }
+        [Key]
+        public int Id { get; set; }
+        public required string Path { get; set; }
+        [JsonIgnore]
+        public IEnumerable<RoomTemplate>? Templates { get; set; }
     }
 }
 

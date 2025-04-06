@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using HotelReservation.Components.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using HotelReservation.Components.Models;
 
 namespace HotelReservation.Data
 {

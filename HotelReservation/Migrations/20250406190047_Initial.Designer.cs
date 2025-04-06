@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250405130826_Initial")]
+    [Migration("20250406190047_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace HotelReservation.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.Property<int>("TypeId")
+                    b.Property<int?>("TypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -403,9 +403,7 @@ namespace HotelReservation.Migrations
                 {
                     b.HasOne("HotelReservation.Components.Models.RoomTemplate", "Type")
                         .WithMany("Rooms")
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TypeId");
 
                     b.Navigation("Type");
                 });
