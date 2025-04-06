@@ -52,10 +52,10 @@
 else
 {
     <h4>Please confirm your reservation:</h4>
-    <p><strong>Room ID:</strong> @roomId</p>
+    <p><strong>Room:</strong> @roomName</p>
     <p><strong>Adults:</strong> @adults</p>
     <p><strong>Kids:</strong> @kids</p>
-    <p><strong>From:</strong> @reservationStart.ToShortDateString()</p>
+    <p><strong>From:</strong> @reservationBegin.ToShortDateString()</p>
     <p><strong>To:</strong> @reservationEnd.ToShortDateString()</p>
 
     @if (reservingForSelf)
@@ -84,9 +84,10 @@ else
 
 @code {
     private int roomId;
+    private string roomName = "";
     private int adults;
     private int kids;
-    private DateTime reservationStart;
+    private DateTime reservationBegin;
     private DateTime reservationEnd;
 
     private bool isAuthenticated;
@@ -108,9 +109,10 @@ else
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
 
         roomId = int.Parse(query.Get("room"));
+        roomName = DbContext.RoomTemplates.First(t => t.Id == roomId).Name;
         adults = int.Parse(query.Get("adults"));
         kids = int.Parse(query.Get("kids"));
-        reservationStart = DateTime.Parse(query.Get("start"));
+        reservationBegin = DateTime.Parse(query.Get("start"));
         reservationEnd = DateTime.Parse(query.Get("end"));
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -121,7 +123,7 @@ else
         if (isAuthenticated)
         {
             var appUser = await UserManager.GetUserAsync(user);
-            userName = appUser?.UserName;
+            userName = appUser?.FullName;
             userEmail = appUser?.Email;
             userPhone = appUser?.PhoneNumber;
         }
@@ -150,11 +152,15 @@ else
         {
             await DbContext.Reservations.AddAsync(new Reservation()
             {
-                Room = DbContext.Rooms.First(r => r.Id == roomId),
+                Room = DbContext.Rooms.First(r => r.Type.Id == roomId && 
+                    !r.Reservations.Any(res => 
+                        (reservationBegin >= res.Begin && reservationBegin < res.End) || 
+                        (reservationEnd > res.Begin && reservationEnd <= res.End) || 
+                        (reservationBegin < res.Begin && reservationEnd > res.End))),
                 UserName = userName,
                 UserEmail = userEmail,
                 UserPhone = userPhone,
-                Begin = reservationStart,
+                Begin = reservationBegin,
                 End = reservationEnd,
                 AdultsNumber = adults,
                 ChildrenNumber = kids,
@@ -164,11 +170,15 @@ else
         {
             await DbContext.Reservations.AddAsync(new Reservation()
             {
-                Room = DbContext.Rooms.First(r => r.Id == roomId),
+                Room = DbContext.Rooms.First(r => r.Type.Id == roomId && 
+                    !r.Reservations.Any(res => 
+                        (reservationBegin >= res.Begin && reservationBegin < res.End) || 
+                        (reservationEnd > res.Begin && reservationEnd <= res.End) || 
+                        (reservationBegin < res.Begin && reservationEnd > res.End))),
                 UserName = guestName,
                 UserEmail = guestEmail,
                 UserPhone = guestPhone,
-                Begin = reservationStart,
+                Begin = reservationBegin,
                 End = reservationEnd,
                 AdultsNumber = adults,
                 ChildrenNumber = kids,

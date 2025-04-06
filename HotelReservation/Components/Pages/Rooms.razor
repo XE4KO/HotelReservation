@@ -50,7 +50,7 @@
 		roomTypes = await DbContext.RoomTemplates
 		.Include(t => t.Tags)
 		.Include(t => t.Images)
-		.Include(t => t.Rooms)
+		.Include(t => t.Rooms).ThenInclude(r => r.Reservations)
 		.ToListAsync();
 		await base.OnInitializedAsync();
 	}
@@ -60,8 +60,9 @@
 		if (adultsFilter > 0 && roomTypes.Any(t => t.Rooms != null && t.Rooms.Count() > 0))
 		{
 			filteredRooms = roomTypes.FindAll(t => t.Adults - adultsFilter >= 0 && t.Kids + t.Adults - (kidsFilter + adultsFilter) >= 0);
-
-			//filteredRooms = filteredRooms.FindAll(t => t.Rooms.Any(r => r.Reservations.FirstOrDefault(res => (reservationBegin > res.Begin && reservationBegin < res.End) || (reservationEnd > res.Begin && reservationEnd < res.End)) != null));
+			filteredRooms = filteredRooms.FindAll(t => 
+				t.Rooms.Any(r => 
+					!r.Reservations.Any(res => (reservationBegin >= res.Begin && reservationBegin < res.End) || (reservationEnd > res.Begin && reservationEnd <= res.End) || (reservationBegin < res.Begin && reservationEnd > res.End))));
 		}
 		else
 		{

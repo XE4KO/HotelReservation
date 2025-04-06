@@ -10,7 +10,6 @@ namespace HotelReservation.Components.Models
     {
         [Key]
         public int Id { get; set; }
-        public int TypeId { get; set; }
         public RoomTemplate? Type { get; set; }
         public required int Floor { get; set; }
         public required int Number { get; set; }
