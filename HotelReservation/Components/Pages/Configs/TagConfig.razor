@@ -1,0 +1,79 @@
+﻿@page "/config/tags"
+@layout ConfigLayout
+@using HotelReservation.Components.Models
+@using HotelReservation.Components.Pages.Configs.Components
+@using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@inject ApplicationDbContext DbContext;
+
+<div class="mt-4">
+    <h3 class="mb-4">Tags</h3>
+
+    @if (!isLoading)
+    {
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <TagComponent NewTag="NewTag()" OnSave="NewTagAsync" />
+            </div>
+            @if (!string.IsNullOrEmpty(tagErrorMessage))
+            {
+                <div class="text-danger">@tagErrorMessage</div>
+            }
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            @foreach (var tag in tags)
+            {
+                <div class="col">
+                    <div class="card shadow-sm p-3 d-flex justify-content-between align-items-center flex-row">
+                        <span class="fw-semibold">@tag.Name</span>
+                        <button class="btn btn-danger btn-sm ms-2" @onclick="() => DeleteTagAsync(tag)">
+                            &#x2716;
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">Loading...</div>
+    }
+</div>
+
+
+@code {
+    private Tag NewTag() => new Tag() { Name = "" };
+    private List<Tag> tags = new();
+    private bool isLoading = true;
+    private string tagErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        tags = await DbContext.Tags.ToListAsync();
+        isLoading = false;
+    }
+
+    private async Task DeleteTagAsync(Tag tag)
+    {
+        DbContext.Tags.Remove(tag);
+        await DbContext.SaveChangesAsync();
+        tags.Remove(tag);
+        StateHasChanged();
+    }
+
+    private async Task NewTagAsync(Tag tag)
+    {
+        if (!tags.Any(t => t.Name == tag.Name))
+        {
+            await DbContext.Tags.AddAsync(tag);
+            await DbContext.SaveChangesAsync();
+            tags.Add(tag);
+            tagErrorMessage = "";
+            StateHasChanged();
+        }else{
+            tagErrorMessage = "Tag already exists.";
+        }
+    }
+}

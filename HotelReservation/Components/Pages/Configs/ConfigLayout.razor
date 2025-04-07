@@ -1,0 +1,38 @@
+﻿@inherits LayoutComponentBase
+@layout HotelReservation.Components.Layout.MainLayout
+@inject NavigationManager NavigationManager
+
+<div class="d-flex" style="min-height: 100vh;">
+    <div class="border-end bg-light p-3" style="min-width: 200px; margin: 0; padding: 0;">
+        <nav class="nav nav-pills flex-column">
+            <NavLink href="/config/templates" class="nav-link" Match="NavLinkMatch.All">Templates</NavLink>
+            <NavLink href="/config/tags" class="nav-link">Tags</NavLink>
+            <NavLink href="/config/rooms" class="nav-link">Rooms</NavLink>
+            <NavLink href="/config/images" class="nav-link">Images</NavLink>
+        </nav>
+    </div>
+    <div class="flex-grow-1 p-4 content">
+        @Body
+    </div>
+</div>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelReservation.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250406190047_Initial")]
+    [Migration("20250407111750_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -193,7 +193,7 @@ namespace HotelReservation.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256) COLLATE utf8mb4_bin");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");

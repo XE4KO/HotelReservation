@@ -4,71 +4,83 @@
 @using Microsoft.EntityFrameworkCore
 @using System.ComponentModel.DataAnnotations.Schema
 
-<form>
-    <div>
+<form class=" mt-4">
+    <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="name" name="name" placeholder="(required)" @bind="Template.Name" required />
         <label for="name">Name</label>
-        <input type="text" id="name" name="name" placeholder="(required)" @bind="Template.Name" required />
-    </div>
-    <div>
-        <label for="dbeds">Adults</label>
-        <input type="number" id="adults" name="adults" placeholder="(required)" @bind="Template.Adults" required />
-    </div>
-    <div>
-        <label for="sbeds">Kids</label>
-        <input type="number" id="kids" name="kids" placeholder="(required)" @bind="Template.Kids" required />
-    </div>
-    <div>
-        <label for="price">Price per Night</label>
-        <input type="number" id="price" name="price" placeholder="(required)" @bind="Template.NightlyPrice" required />
     </div>
 
-    <div>
+    <div class="form-floating mb-3">
+        <input type="number" class="form-control" id="adults" name="adults" placeholder="(required)" @bind="Template.Adults" required />
+        <label for="adults">Adults</label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input type="number" class="form-control" id="kids" name="kids" placeholder="(required)" @bind="Template.Kids" required />
+        <label for="kids">Kids</label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input type="number" class="form-control" id="price" name="price" placeholder="(required)" @bind="Template.NightlyPrice" required />
+        <label for="price">Price per Night</label>
+    </div>
+
+    <div class="mb-3">
         <label>Tags</label>
         @foreach (var templateTag in Template.Tags)
         {
-            <div>
-                @templateTag.Name
-                <button type="button" @onclick=@(() => DeleteTag(templateTag))>&#x2716;</button>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>@templateTag.Name</span>
+                <button type="button" class="btn btn-sm btn-danger" @onclick="@(() => DeleteTag(templateTag))">&#x2716;</button>
             </div>
         }
-            <div>
-                <select type="text" id="new-tag" @bind="newTag.Name" @bind:after="SaveTag">
-                    <option value="">-- Add New Tag --</option>
-                    @foreach (var tag in tags)
-                    {
-                        <option value="@tag.Name">@tag.Name</option>
-                    }
-                </select>
-            </div>
+
+        <div class="input-group mb-3">
+            <select class="form-select" id="new-tag" @bind="newTag.Name" @bind:after="SaveTag">
+                <option value="">-- Add New Tag --</option>
+                @foreach (var tag in tags)
+                {
+                    <option value="@tag.Name">@tag.Name</option>
+                }
+            </select>
+        </div>
+
         @if (!string.IsNullOrEmpty(tagErrorMessage))
         {
             <div class="text-danger">@tagErrorMessage</div>
         }
     </div>
 
-    <div>
-        <button type="button" @onclick="() => imageSelection = true">Select Image</button>
+    <div class="mb-3">
+        <button type="button" class="btn btn-secondary" @onclick="() => imageSelection = true">Select Image</button>
+
         @if (imageSelection)
         {
             <ImageSelectComponent OnSave="AddImage" OnCancel="() => imageSelection = false" CurrentImages="Template.Images" />
         }
+
         @foreach (var image in Template.Images)
         {
-            <div>
-                <img src="@image.Path" style="width:100px; height:100px;" />
-                <button type="button" @onclick="() => RemoveImage(image)">X</button>
+            <div class="d-inline-block position-relative mb-3 me-2">
+                <img src="@image.Path" class="rounded template-image" />
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" @onclick="() => RemoveImage(image)">X</button>
             </div>
         }
     </div>
-    <div>
+
+    <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="desc" name="desc" placeholder="(optional)" @bind="Template.Description" />
         <label for="desc">Description</label>
-        <input type="text" id="desc" name="desc" placeholder="(optional)" @bind="Template.Description" />
     </div>
+
     @if (Mode != null)
     {
-        <input type="button" @onclick="Save" id="submit" value="@Mode" disabled="@invalidTag" />
+        <div class="mb-3">
+            <input type="button" class="w-100 btn btn-lg btn-primary" @onclick="Save" id="submit" value="@Mode" disabled="@invalidTag" />
+        </div>
     }
 </form>
+
 
 @code {
     [Parameter] public required RoomTemplate Template { get; set; }

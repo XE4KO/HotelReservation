@@ -190,7 +190,7 @@ namespace HotelReservation.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256) COLLATE utf8mb4_bin");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");

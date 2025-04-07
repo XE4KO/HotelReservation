@@ -1,0 +1,18 @@
+﻿<div class="mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Name: @Template.Name</h5>
+
+        @if (!string.IsNullOrWhiteSpace(Template.Description))
+        {
+            <p class="card-text"><strong>Description:</strong> @Template.Description</p>
+        }
+
+        @ChildContent
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public required Models.RoomTemplate Template { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

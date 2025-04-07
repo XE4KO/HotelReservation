@@ -88,10 +88,9 @@
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
             NavigationManager.ToAbsoluteUri("Account/ConfirmEmailChange").AbsoluteUri,
             new Dictionary<string, object?> { ["userId"] = userId, ["email"] = Input.NewEmail, ["code"] = code });
-
         await EmailSender.SendConfirmationLinkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Confirmation link to change email sent. Please check your email.";
+        message = $"Confirmation link to change email sent. Please check your email. Or <a href={HtmlEncoder.Default.Encode(callbackUrl)}>click here</a> to change your email directly.";
     }
 
     private async Task OnSendEmailVerificationAsync()

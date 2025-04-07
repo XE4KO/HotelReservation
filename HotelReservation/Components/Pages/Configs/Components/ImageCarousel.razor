@@ -1,0 +1,46 @@
+﻿@rendermode InteractiveServer
+@using HotelReservation.Components.Models
+
+@if (Images != null && Images.Count() > 0)
+{
+    <div class="position-relative w-100 h-100">
+        <div class="overflow-hidden" style="height: 180px;">
+            <img src="@Images[currentIndex].Path" alt="Image"
+                 class="w-100 h-100"
+                 style="object-fit: contain;" />
+        </div>
+
+        <button type="button"
+                class="carousel-btn start"
+                @onclick="PrevImage">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <button type="button"
+                class="carousel-btn end"
+                @onclick="NextImage">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+}
+
+
+
+
+
+@code {
+    [Parameter] public List<Image>? Images { get; set; }
+    private int currentIndex = 0;
+
+    private void NextImage()
+    {
+            currentIndex = (currentIndex + 1) % Images.Count;
+            StateHasChanged();
+    }
+
+    private void PrevImage()
+    {
+            currentIndex = (currentIndex - 1 + Images.Count) % Images.Count;
+            StateHasChanged();
+    }
+}

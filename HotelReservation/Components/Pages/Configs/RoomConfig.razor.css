@@ -1,0 +1,13 @@
+﻿.room-input {
+	display: inline-block;
+	min-width: 1rem;
+}
+
+.room {
+	width: 250px;
+	height: auto;
+}
+
+.nowrap {
+	white-space: nowrap;
+}

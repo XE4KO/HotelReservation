@@ -8,79 +8,105 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext DbContext;
 
-<h3>Make a Reservation</h3>
+<div class="container mt-4">
+    <h3 class="mb-4">Make a Reservation</h3>
 
-<div style="display: flex; gap: 10px; margin-bottom: 20px;">
-    <button @onclick="() => ToggleReservation(true)" disabled="@reservingForSelf">Reserve for Yourself</button>
-    <button @onclick="() => ToggleReservation(false)" disabled="@( !reservingForSelf )">Reserve for Someone Else</button>
+    <div class="d-flex gap-3 mb-4">
+        <button @onclick="() => ToggleReservation(true)" disabled="@reservingForSelf" class="btn btn-outline-primary">Reserve for Yourself</button>
+        <button @onclick="() => ToggleReservation(false)" disabled="@( !reservingForSelf )" class="btn btn-outline-secondary">Reserve for Someone Else</button>
+    </div>
+
+    @if (!isConfirming)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (isAuthenticated && reservingForSelf)
+                {
+                    <p class="mb-1"><strong>Logged in as:</strong> @userName</p>
+                    <p class="mb-1"><strong>Email:</strong> @userEmail</p>
+                    <p class="mb-3"><strong>Phone:</strong> @userPhone</p>
+
+                    <div class="mb-3">
+                        <label class="form-label">Special Requests (Optional):</label>
+                        <textarea class="form-control" @bind="requestMessage"></textarea>
+                    </div>
+
+                    <button @onclick="ShowConfirmation" class="btn btn-success w-100">Confirm Reservation</button>
+                }
+                else if (!isAuthenticated && reservingForSelf)
+                {
+                    <div class="alert alert-warning" role="alert">
+                        Please <a href="Account/Login">log in</a> to make a reservation for yourself.
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" @bind-value="guestName" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" @bind-value="guestEmail" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-control" @bind-value="guestPhone" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Special Requests (Optional)</label>
+                        <textarea class="form-control" @bind="requestMessage"></textarea>
+                    </div>
+
+                    <button @onclick="ShowConfirmation" class="btn btn-success w-100">Confirm Reservation</button>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Please confirm your reservation:</h5>
+
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item"><strong>Room:</strong> @roomName</li>
+                    <li class="list-group-item"><strong>Adults:</strong> @adults</li>
+                    <li class="list-group-item"><strong>Kids:</strong> @kids</li>
+                    <li class="list-group-item"><strong>From:</strong> @reservationBegin.ToShortDateString()</li>
+                    <li class="list-group-item"><strong>To:</strong> @reservationEnd.ToShortDateString()</li>
+
+                    @if (reservingForSelf)
+                    {
+                        <li class="list-group-item"><strong>Name:</strong> @userName</li>
+                        <li class="list-group-item"><strong>Email:</strong> @userEmail</li>
+                        <li class="list-group-item"><strong>Phone:</strong> @userPhone</li>
+                    }
+                    else
+                    {
+                        <li class="list-group-item"><strong>Name:</strong> @guestName</li>
+                        <li class="list-group-item"><strong>Email:</strong> @guestEmail</li>
+                        <li class="list-group-item"><strong>Phone:</strong> @guestPhone</li>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(requestMessage))
+                    {
+                        <li class="list-group-item"><strong>Special Requests:</strong> @requestMessage</li>
+                    }
+                </ul>
+
+                <div class="d-flex justify-content-between">
+                    <button @onclick="ConfirmReservationAsync" class="btn btn-success w-100 me-2">Yes, everything is correct</button>
+                    <button @onclick="() => isConfirming = false" class="btn btn-outline-secondary w-100 ms-2">Go Back</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
-@if (!isConfirming)
-{
-    @if (isAuthenticated && reservingForSelf)
-    {
-        <p>Logged in as: @userName</p>
-        <p>Email: @userEmail</p>
-        <p>Phone: @userPhone</p>
-
-        <label>Special Requests (Optional):</label>
-        <textarea @bind="requestMessage"></textarea>
-
-        <button @onclick="ShowConfirmation">Confirm Reservation</button>
-    }
-    else if (!isAuthenticated && reservingForSelf)
-    {
-        <p>Please <a href="Account/Login">log in</a> to make a reservation for yourself.</p>
-    }
-    else
-    {
-        <label>Name:</label>
-        <input type="text" @bind-value="guestName" required />
-
-        <label>Email:</label>
-        <input type="email" @bind-value="guestEmail" required />
-
-        <label>Phone:</label>
-        <input type="tel" @bind-value="guestPhone" required />
-
-        <label>Special Requests (Optional):</label>
-        <textarea @bind="requestMessage"></textarea>
-
-        <button @onclick="ShowConfirmation">Confirm Reservation</button>
-    }
-}
-else
-{
-    <h4>Please confirm your reservation:</h4>
-    <p><strong>Room:</strong> @roomName</p>
-    <p><strong>Adults:</strong> @adults</p>
-    <p><strong>Kids:</strong> @kids</p>
-    <p><strong>From:</strong> @reservationBegin.ToShortDateString()</p>
-    <p><strong>To:</strong> @reservationEnd.ToShortDateString()</p>
-
-    @if (reservingForSelf)
-    {
-        <p><strong>Name:</strong> @userName</p>
-        <p><strong>Email:</strong> @userEmail</p>
-        <p><strong>Phone:</strong> @userPhone</p>
-    }
-    else
-    {
-        <p><strong>Name:</strong> @guestName</p>
-        <p><strong>Email:</strong> @guestEmail</p>
-        <p><strong>Phone:</strong> @guestPhone</p>
-    }
-
-    @if (!string.IsNullOrWhiteSpace(requestMessage))
-    {
-        <p><strong>Special Requests:</strong> @requestMessage</p>
-    }
-
-    <div style="margin-top: 1rem;">
-        <button @onclick="ConfirmReservationAsync">Yes, everything is correct</button>
-        <button style="margin-left: 1rem;" @onclick="() => isConfirming = false">Go Back</button>
-    </div>
-}
 
 @code {
     private int roomId;

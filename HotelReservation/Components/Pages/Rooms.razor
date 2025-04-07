@@ -1,41 +1,92 @@
 ﻿@page "/rooms"
 @rendermode InteractiveServer
 @using HotelReservation.Components.Models
+@using HotelReservation.Components.Pages.Configs.Components
 @using HotelReservation.Data
 @using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext DbContext;
 @inject NavigationManager Navigation
+<style>
+    .description-box {
+        max-height: 5.4rem; /* Limits to 3 rows height (based on your font size) */
+        overflow-y: auto; /* Enables scrolling when content overflows */
+        padding-right: 10px; /* Adds some padding for better scrolling appearance */
+    }
 
-<h3>Rooms</h3>
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+</style>
+<div class="container mt-4">
+    <h3 class="mb-4">Rooms</h3>
 
-<div>
-	<label for="adults">Adults</label>
-	<input type="number" id="adults" @bind-value="adultsFilter" min="0" />
-	<label for="kids">Kids</label>
-	<input type="number" id="kids" @bind-value="kidsFilter" min="0" />
-	<label for="reservation-start">From</label>
-	<input type="date" id="reservation-start" @bind-value="reservationBegin" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
-	<label for="reservation-end">Until</label>
-	<input type="date" id="reservation-end" @bind-value="reservationEnd" min="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" />
-	<button type="button" @onclick="() => Filter()">Search</button>
+    <!-- Filter Section -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <label for="adults" class="form-label">Adults</label>
+            <input type="number" id="adults" @bind-value="adultsFilter" min="0" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label for="kids" class="form-label">Kids</label>
+            <input type="number" id="kids" @bind-value="kidsFilter" min="0" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label for="reservation-start" class="form-label">From</label>
+            <input type="date" id="reservation-start" @bind-value="reservationBegin" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label for="reservation-end" class="form-label">Until</label>
+            <input type="date" id="reservation-end" @bind-value="reservationEnd" min="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="button" @onclick="() => Filter()" class="btn btn-primary w-100">Search</button>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        @foreach (var room in filteredRooms)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div style="height: 180px; overflow: hidden;" class="bg-light d-flex align-items-center justify-content-center">
+                        <ImageCarousel Images="room.Images.ToList()" />
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@room.Name</h5>
+                        <p class="card-text mb-1">Adult Beds: @room.Adults</p>
+                        <p class="card-text mb-1">Kid Beds: @room.Kids</p>
+                        <p class="card-text mb-1">Nightly Price: $@room.NightlyPrice</p>
+                        @if (room.Tags?.Any() == true)
+                        {
+                            <div class="mb-2">
+                                @foreach (var tag in room.Tags)
+                                {
+                                    <span class="badge bg-secondary me-1">@tag.Name</span>
+                                }
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(room.Description))
+                        {
+                            <div class="card-text mb-3 description-box">
+                                <p title="@room.Description">@room.Description</p>
+                            </div>
+                        }
+                        <div class="mt-auto">
+                            <button type="button" @onclick="() => SelectRoom(room.Id, adultsFilter, kidsFilter, reservationBegin, reservationEnd)" class="btn btn-success w-100">
+                                Reserve Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+
+    </div>
 </div>
 
-@foreach (var room in filteredRooms)
-{
-	<div>
-		<ImageCarousel Images="room.Images.ToList()" />
-		@room.Name
-		Adult Beds:@room.Adults
-		Kid Beds:@room.Kids
-		@foreach (var tag in room.Tags)
-		{
-			<text>
-				&#32;@tag.Name
-			</text>
-		}
-		<button type="button" @onclick="() => SelectRoom(room.Id, adultsFilter, kidsFilter, reservationBegin, reservationEnd)">Reserve Now</button>
-	</div>
-}
 
 @code {
 	private List<RoomTemplate>? roomTypes = new();

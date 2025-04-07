@@ -4,13 +4,16 @@
 @rendermode InteractiveServer
 @inject ApplicationDbContext DbContext;
 
-<div>
-    <label for="name">Name</label>
-    <input type="text" id="name" placeholder="Tag Name" @bind-value="@NewTag.Name" @onkeyup="OnSaveOnEnterAsync" required />
+<div class="form-floating mb-3">
+    <input type="text" id="name" class="form-control" placeholder="Tag Name"
+           @bind-value="@NewTag.Name" @onkeyup="OnSaveOnEnterAsync" required />
+    <label for="name">Tag Name</label>
 </div>
-<div>
-    <input type="button" @onclick="Save" value="add tag">
+
+<div class="mb-3">
+    <input type="button" @onclick="Save" value="Add Tag" class="btn btn-primary w-100" />
 </div>
+
 
 @code {
     [Parameter] public required Tag NewTag { get; set; }

@@ -3,16 +3,18 @@
 @using Microsoft.EntityFrameworkCore
 @rendermode InteractiveServer
 
-<span>
+<span class="mb-3">
     @ChildContent
-    <select id="type" placeholder="Select Template" @onchange="ChangeTemplate" required>
-        <option value="">-- Select an option --</option>
+    <select id="type" class="form-control form-control-sm room-input" style="text-align: center; text-align-last: center;max-width: 12rem;" placeholder="Select Template" @onchange="ChangeTemplate" required>
+        <option value="">-- Select Template --</option>
         @foreach (var template in RoomTemplates)
         {
-            <option value=@template.Id>@template.Name</option>
-        }
+            <option value="@template.Id">@template.Name</option>
+        }   
     </select>
 </span>
+
+
 
 @code {
     [Parameter] public required List<RoomTemplate> RoomTemplates { get; set; }

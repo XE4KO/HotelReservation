@@ -1,6 +1,8 @@
-﻿@page "/room-template-config"
+﻿@page "/config/templates"
+@layout ConfigLayout
 @rendermode InteractiveServer
 @using HotelReservation.Components.Models
+@using HotelReservation.Components.Pages.Configs.Components
 @using HotelReservation.Data
 @using Microsoft.EntityFrameworkCore
 @using System.Threading.Channels
@@ -8,42 +10,52 @@
 @using System.Collections
 @inject ApplicationDbContext DbContext;
 
-<h3>Room Templates</h3>
-<br>
-@if (!isLoading)
-{
-    <div>
-        <button @onclick="SwitchCreateRoomTemplate">create room template</button>
+<div class="mt-4">
+    <h3 class="mb-4">Room Templates</h3>
+    <div class="row">
+        <div class="col-md-6">
+            @if (!isLoading)
+            {
+                <button @onclick="SwitchCreateRoomTemplate" class="btn btn-primary mb-3">Create Room Template</button>
 
-        @if (createRoomTemplate)
-        {
-            <RoomTemplateComponent Template=@NewTemplate() Tags="AllTags" Mode="Create" OnSave="AddRoomTemplateAsync" />
-        }
-        @if (roomTemplates == null)
-        {
-            <div>Loading...</div>
-        }
-        else
-        {
-            <div>
-                @foreach (RoomTemplate template in roomTemplates)
+                @if (createRoomTemplate)
                 {
-                    <RoomTemplateOverview Template=template>
-                        <button @onclick=@(() => EditTemplate(template))>&#x270E;</button>
-                        <button @onclick=@(() => DeleteTemplateAsync(template))>&#x2716;</button>
-                    </RoomTemplateOverview>
-                    if (editTemplate != null && template.Id == editTemplate.Id)
-                    {
-                        <RoomTemplateComponent Template=@editTemplate Tags="AllTags" Mode="Save" OnSave="UpdateRoomTemplateAsync" />
-                    }
+                    <RoomTemplateComponent Template=@NewTemplate() Tags="AllTags" Mode="Create" OnSave="AddRoomTemplateAsync" />
                 }
-            </div>
-        }
+
+                @if (roomTemplates == null)
+                {
+                    <div>Loading...</div>
+                }
+                else
+                {
+                    <div>
+                        @foreach (RoomTemplate template in roomTemplates)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <RoomTemplateOverview Template=template>
+                                        <button @onclick=@(() => EditTemplate(template)) class="btn btn-sm btn-warning me-2">&#x270E; Edit</button>
+                                        <button @onclick=@(() => DeleteTemplateAsync(template)) class="btn btn-sm btn-danger">&#x2716; Delete</button>
+                                    </RoomTemplateOverview>
+                                    @if (editTemplate != null && template.Id == editTemplate.Id)
+                                    {
+                                        <RoomTemplateComponent Template=@editTemplate Tags="AllTags" Mode="Save" OnSave="UpdateRoomTemplateAsync" />
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <span>Loading...</span>
+            }
+        </div>
     </div>
-}else
-{
-    <span>Loading...</span>
-}
+</div>
+
 
 @code {
     bool createRoomTemplate = false;
@@ -75,26 +87,6 @@
 
     protected async Task AddRoomTemplateAsync(RoomTemplate template)
     {
-        // List<Tag> tagsToAttach = new();
-        // foreach (var templateTag in template.Tags)
-        // {
-        //     var localTag = DbContext.Tags.Local.FirstOrDefault(t => t.Id == templateTag.Id);
-        //     if (localTag != null)
-        //     {
-        //         tagsToAttach.Add(localTag);
-        //     }
-        //     else
-        //     {
-        //         var existingTag = await DbContext.Tags.AsNoTracking().FirstAsync(t => t.Id == templateTag.Id);
-        //         DbContext.Attach(existingTag);
-        //         tagsToAttach.Add(existingTag);
-        //     }
-        // }
-        // template.Tags = tagsToAttach;
-        // foreach (var tag in template.Tags)
-        // {
-        //     DbContext.Attach(tag);
-        // }
         await DbContext.RoomTemplates.AddAsync(template);
         await DbContext.SaveChangesAsync();
         await RefreshTemplates();

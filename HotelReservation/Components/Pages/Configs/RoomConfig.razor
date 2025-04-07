@@ -1,0 +1,195 @@
+﻿@page "/config/rooms"
+@layout ConfigLayout
+@using HotelReservation.Components.Models
+@using HotelReservation.Components.Pages.Configs.Components
+@using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@inject ApplicationDbContext DbContext;
+
+<div class="mt-4">
+	<h3 class="mb-4">Rooms</h3>
+
+	<div class="mb-3">
+		@if (isLoading)
+		{
+			<div class="alert alert-info" role="alert">
+				Loading...
+			</div>
+		}
+		else if (roomTemplates == null || roomTemplates.Count() == 0)
+		{
+			<div class="alert alert-warning" role="alert">
+				No templates to have or create rooms.
+			</div>
+		}
+		else
+		{
+			<div class="mb-3">
+				<RoomTemplateSelectComponent OnChange="x => selectedTemplate = x" RoomTemplates="roomTemplates">
+					<label for="type" class="form-label">Type</label>
+				</RoomTemplateSelectComponent>
+			</div>
+
+			<button @onclick="() => AddNewFloorAsync()" disabled="@(selectedTemplate == null || string.IsNullOrWhiteSpace(selectedTemplate.Name))" class="btn btn-success mb-3">Add Floor</button>
+
+			@foreach (var floor in rooms)
+			{
+				<div class="card mb-3">
+					<div class="card-body">
+						<h5 class="card-title d-flex justify-content-between align-items-center">
+							@floor.Key
+							<button @onclick="() => CollapseFloor(floor)"
+							class="btn btn-outline-secondary btn-sm ms-3"
+							style="font-size: 0.8rem;">
+								Collapse
+							</button>
+						</h5>
+
+						@if (!(collapsedFloor.Any(f => f.Key == floor.Key)))
+						{
+							<div class="d-flex flex-wrap gap-4">
+								@foreach (var room in floor)
+								{
+									<div class="d-flex flex-column align-items-center p-4 shadow-sm border rounded-3 room">
+										@if (editingRoom && editRoom == room)
+										{
+											<div class="mb-2 w-100">
+												<label class="form-label">Room Number:</label>
+												<input @bind-value="room.Number" class="form-control form-control-sm room-input" style="max-width: 5rem;" />
+											</div>
+											<div class="mb-2 w-100">
+												<label class="form-label">Type:</label>
+												<RoomTemplateSelectComponent OnChange="x => room.Type = x" RoomTemplates="roomTemplates" />
+											</div>
+										}
+										else
+										{
+											<div class="mb-2 w-100">
+												<div>Room Number: @room.Number</div>
+												<div>Type: @room.Type.Name</div>
+											</div>
+										}
+
+										<div class="d-flex justify-content-between align-items-center w-100 mt-auto">
+											<button disabled="@(floor.Count() == 1)" @onclick="() => DeleteRoomAsync(room)" class="btn btn-danger btn-sm ms-2 nowrap">&#x2716; Delete</button>
+											<button @onclick="() => EditRoomAsync(room)" class="btn btn-warning btn-sm ms-2 nowrap">&#x270E; Edit</button>
+										</div>
+									</div>
+								}
+							</div>
+							<button @onclick="() => AddNewRoomAsync(floor.Key)" disabled="@(selectedTemplate == null || string.IsNullOrWhiteSpace(selectedTemplate.Name))" class="btn btn-secondary btn-sm mt-3">Add Room</button>
+						}
+					</div>
+				</div>
+			}
+		}
+	</div>
+</div>
+
+
+@code {
+	private bool editingRoom;
+	private Room? editRoom;
+	private List<RoomTemplate> roomTemplates = new();
+	private RoomTemplate? selectedTemplate;
+	private List<IGrouping<int, Room>> rooms = new();
+	private bool isLoading = true;
+	private List<IGrouping<int, Room>> collapsedFloor = new();
+
+	private void CollapseFloor(IGrouping<int, Room> floor)
+	{
+		if (collapsedFloor.Any(f => f.Key == floor.Key))
+		{
+			collapsedFloor.Remove(collapsedFloor.First(f => f.Key == floor.Key));
+		}else
+		{
+			collapsedFloor.Add(floor);
+		}
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await RefreshAsync();
+			isLoading = false;
+			StateHasChanged();
+		}
+		await base.OnAfterRenderAsync(firstRender);
+	}
+	private async Task<Room> NewFloorRoomAsync()
+	{
+		int newFloor = await GetNewFloorAsync();
+		return new Room { Floor = newFloor, Number = 1, Type = selectedTemplate };
+	}
+	private async Task RefreshRoomsAsync()
+	{
+		rooms = await DbContext.Rooms
+			.OrderBy(room => room.Floor)
+			.ThenBy(room => room.Number)
+			.GroupBy(room => room.Floor)
+			.ToListAsync();
+	}
+	private async Task DeleteRoomAsync(Room room)
+	{
+		DbContext.Rooms.Remove(room);
+		await DbContext.SaveChangesAsync();
+		await RefreshRoomsAsync();
+	}
+	private async Task<int> GetNewFloorAsync()
+	{
+		if (!await DbContext.Rooms.AnyAsync())
+			return 1;
+		else
+			return (await DbContext.Rooms.MaxAsync(room => room.Floor)) + 1;
+	}
+	private async Task<int> GetNewRoomNumberAsync(int floor)
+	{
+		var roomNumbers = await DbContext.Rooms
+		.Where(room => room.Floor == floor)
+		.Select(room => room.Number)
+		.ToListAsync();
+		return roomNumbers.Max() + 1;
+	}
+	private async Task AddNewFloorAsync()
+	{
+		await AddRoomAsync(await NewFloorRoomAsync());
+	}
+	private async Task AddNewRoomAsync(int floor)
+	{
+		int newNumber = await GetNewRoomNumberAsync(floor);
+		await AddRoomAsync(new Room() { Floor = floor, Number = newNumber, Type = selectedTemplate });
+		await RefreshAsync();
+	}
+	private async Task AddRoomAsync(Room room)
+	{
+		await DbContext.Rooms.AddAsync(room);
+		await DbContext.SaveChangesAsync();
+		await RefreshAsync();
+	}
+	private async Task RefreshTemplatesAsync()
+		=> roomTemplates = await GetAllRoomTemplatesAsync();
+	private Task<List<RoomTemplate>> GetAllRoomTemplatesAsync()
+		=> DbContext.RoomTemplates.ToListAsync();
+	private async Task RefreshAsync()
+	{
+		await RefreshTemplatesAsync();
+		await RefreshRoomsAsync();
+	}
+	private void EditRoomAsync(Room room)
+	{
+		if (editingRoom && editRoom == room)
+		{
+			editingRoom = false;
+			editRoom = null;
+
+		}
+		else
+		{
+			editingRoom = true;
+			editRoom = room;
+		}
+		StateHasChanged();
+	}
+}

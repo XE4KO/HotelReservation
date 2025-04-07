@@ -1,0 +1,11 @@
+﻿.description-box {
+	max-height: 5.4rem; /* Limits to 3 rows height (based on your font size) */
+	overflow-y: auto; /* Enables scrolling when content overflows */
+	padding-right: 10px; /* Adds some padding for better scrolling appearance */
+}
+
+.card-body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
