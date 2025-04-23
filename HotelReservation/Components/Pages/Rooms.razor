@@ -6,23 +6,10 @@
 @using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext DbContext;
 @inject NavigationManager Navigation
-<style>
-    .description-box {
-        max-height: 5.4rem; /* Limits to 3 rows height (based on your font size) */
-        overflow-y: auto; /* Enables scrolling when content overflows */
-        padding-right: 10px; /* Adds some padding for better scrolling appearance */
-    }
 
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-</style>
 <div class="container mt-4">
     <h3 class="mb-4">Rooms</h3>
 
-    <!-- Filter Section -->
     <div class="row g-3 mb-4">
         <div class="col-md-2">
             <label for="adults" class="form-label">Adults</label>
@@ -34,11 +21,11 @@
         </div>
         <div class="col-md-3">
             <label for="reservation-start" class="form-label">From</label>
-            <input type="date" id="reservation-start" @bind-value="reservationBegin" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" class="form-control" />
+            <input type="date" id="reservation-start" @bind="reservationBegin" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" class="form-control" />
         </div>
         <div class="col-md-3">
             <label for="reservation-end" class="form-label">Until</label>
-            <input type="date" id="reservation-end" @bind-value="reservationEnd" min="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" class="form-control" />
+            <input type="date" id="reservation-end" @bind-value="reservationEnd" min="@reservationBegin.AddDays(1).ToString("yyyy-MM-dd")" class="form-control" />
         </div>
         <div class="col-md-2 d-flex align-items-end">
             <button type="button" @onclick="() => Filter()" class="btn btn-primary w-100">Search</button>
@@ -113,7 +100,10 @@
 			filteredRooms = roomTypes.FindAll(t => t.Adults - adultsFilter >= 0 && t.Kids + t.Adults - (kidsFilter + adultsFilter) >= 0);
 			filteredRooms = filteredRooms.FindAll(t => 
 				t.Rooms.Any(r => 
-					!r.Reservations.Any(res => (reservationBegin >= res.Begin && reservationBegin < res.End) || (reservationEnd > res.Begin && reservationEnd <= res.End) || (reservationBegin < res.Begin && reservationEnd > res.End))));
+					!r.Reservations.Any(res => 
+                    (reservationBegin >= res.Begin && reservationBegin < res.End) || 
+                    (reservationEnd > res.Begin && reservationEnd <= res.End) || 
+                    (reservationBegin < res.Begin && reservationEnd > res.End))));
 		}
 		else
 		{
