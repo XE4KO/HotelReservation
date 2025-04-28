@@ -1,10 +1,62 @@
 ﻿@page "/"
-@inject NavigationManager NavManager
-<PageTitle>Home</PageTitle>
+@rendermode InteractiveServer
+@using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
+@inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
 
-<div class="container mt-5">
-        <div class="card-body">
-            <h1 class="card-title">Hello, world!</h1>
-            <p class="card-text">Welcome to your new app.</p>
+<div class="background-image" style="background-image: url('@backgroundImageUrl'); background-size: cover; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.7;"></div>
+
+<div class="container mt-5" style="position: relative; z-index: 1; color: black;">
+    <div class="card-body">
+        <h1 class="card-title text-center">Welcome to Hotel Name!</h1>
+        <div class="row g-3 mb-4">
+            <div class="col-md-2">
+                <label for="adults" class="form-label">Adults</label>
+                <input type="number" id="adults" @bind-value="adultsFilter" min="0" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label for="kids" class="form-label">Kids</label>
+                <input type="number" id="kids" @bind-value="kidsFilter" min="0" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="reservation-start" class="form-label">From</label>
+                <input type="date" id="reservation-start" @bind="reservationBegin" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="reservation-end" class="form-label">Until</label>
+                <input type="date" id="reservation-end" @bind-value="reservationEnd" min="@reservationBegin.AddDays(1).ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" @onclick="() => SearchRooms()" class="btn btn-primary w-100">Search</button>
+            </div>
         </div>
+    </div>
 </div>
+
+@code {
+    private string backgroundImageUrl;
+    private int adultsFilter;
+    private int kidsFilter;
+    private DateTime reservationBegin = DateTime.Today.AddDays(1);
+    private DateTime reservationEnd = DateTime.Today.AddDays(2);
+
+    private void SearchRooms()
+    {
+        string url = $"/rooms?adults={adultsFilter}&kids={kidsFilter}&start={reservationBegin:yyyy-MM-dd}&end={reservationEnd:yyyy-MM-dd}";
+        Navigation.NavigateTo(url);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var firstImage = await DbContext.Images
+            .OrderBy(i => i.Id)
+            .FirstOrDefaultAsync();
+
+        if (firstImage != null)
+        {
+            backgroundImageUrl = firstImage.Path;
+        }
+    }
+
+}

@@ -8,7 +8,7 @@
 @inject NavigationManager Navigation
 
 <div class="container mt-4">
-    <h3 class="mb-4">Rooms</h3>
+    <h3 class="mb-4">Reserve a Room</h3>
 
     <div class="row g-3 mb-4">
         <div class="col-md-2">
@@ -72,46 +72,56 @@
     </div>
 </div>
 
-
 @code {
-	private List<RoomTemplate>? roomTypes = new();
-	private List<RoomTemplate>? filteredRooms = new();
-	private int adultsFilter;
-	private int kidsFilter;
-	private DateTime reservationBegin = DateTime.Today.AddDays(1);
-	private DateTime reservationEnd = DateTime.Today.AddDays(2);
+    private List<RoomTemplate>? roomTypes = new();
+    private List<RoomTemplate>? filteredRooms = new();
+    private int adultsFilter;
+    private int kidsFilter;
+    private DateTime reservationBegin = DateTime.Today.AddDays(1);
+    private DateTime reservationEnd = DateTime.Today.AddDays(2);
 
-	protected override async Task OnInitializedAsync()
-	{
-		roomTypes = await DbContext.RoomTemplates
-		.Include(t => t.Tags)
-		.Include(t => t.Images)
-		.Include(t => t.Rooms).ThenInclude(r => r.Reservations)
-		.ToListAsync();
-		await base.OnInitializedAsync();
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        roomTypes = await DbContext.RoomTemplates
+            .Include(t => t.Tags)
+            .Include(t => t.Images)
+            .Include(t => t.Rooms).ThenInclude(r => r.Reservations)
+            .ToListAsync();
+        var uri = Navigation.Uri;
+        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(uri).Query);
+        if (queryParams.ContainsKey("adults"))
+            adultsFilter = int.Parse(queryParams["adults"]);
+        if (queryParams.ContainsKey("kids"))
+            kidsFilter = int.Parse(queryParams["kids"]);
+        if (queryParams.ContainsKey("start"))
+            reservationBegin = DateTime.Parse(queryParams["start"]);
+        if (queryParams.ContainsKey("end"))
+            reservationEnd = DateTime.Parse(queryParams["end"]);
 
-	private void Filter()
-	{
-		if (adultsFilter > 0 && roomTypes.Any(t => t.Rooms != null && t.Rooms.Count() > 0))
-		{
-			filteredRooms = roomTypes.FindAll(t => t.Adults - adultsFilter >= 0 && t.Kids + t.Adults - (kidsFilter + adultsFilter) >= 0);
-			filteredRooms = filteredRooms.FindAll(t => 
-				t.Rooms.Any(r => 
-					!r.Reservations.Any(res => 
-                    (reservationBegin >= res.Begin && reservationBegin < res.End) || 
-                    (reservationEnd > res.Begin && reservationEnd <= res.End) || 
+        await base.OnInitializedAsync();
+        Filter();
+    }
+
+    private void Filter()
+    {
+        if (adultsFilter > 0 && roomTypes.Any(t => t.Rooms != null && t.Rooms.Count() > 0))
+        {
+            filteredRooms = roomTypes.FindAll(t => t.Adults - adultsFilter >= 0 && t.Kids + t.Adults - (kidsFilter + adultsFilter) >= 0);
+            filteredRooms = filteredRooms.FindAll(t =>
+                t.Rooms.Any(r =>
+                    !r.Reservations.Any(res =>
+                    (reservationBegin >= res.Begin && reservationBegin < res.End) ||
+                    (reservationEnd > res.Begin && reservationEnd <= res.End) ||
                     (reservationBegin < res.Begin && reservationEnd > res.End))));
-		}
-		else
-		{
-			filteredRooms = new();
-		}
-	}
-
-	private void SelectRoom(int roomId, int adults, int kids, DateTime start, DateTime end, int nightlyPrice)
-	{
-        string url = $"/reservation?room={roomId}&adults={adults}&kids={kids}&start={start:yyyy-MM-dd}&end={end:yyyy-MM-dd}&price={nightlyPrice*(end-start).TotalDays}";
-		Navigation.NavigateTo(url);
-	}
+        }
+        else
+        {
+            filteredRooms = new();
+        }
+    }
+    private void SelectRoom(int roomId, int adults, int kids, DateTime start, DateTime end, int nightlyPrice)
+    {
+        string url = $"/reservation?room={roomId}&adults={adults}&kids={kids}&start={start:yyyy-MM-dd}&end={end:yyyy-MM-dd}&price={nightlyPrice * (end - start).TotalDays}";
+        Navigation.NavigateTo(url);
+    }
 }

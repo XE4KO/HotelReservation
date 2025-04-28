@@ -16,6 +16,12 @@
     {
         <div class="col-12 mb-4">
             <ImageComponent OnSave="AddImageAsync" Image="NewImage()" />
+             @if (savedImages.Count == 0)
+             {
+                <p class="alert alert-info mb-4">
+                The first image will be used as background for the home page!
+                </p>
+             }
         </div>
         <div class="row g-3">
             @foreach (var image in savedImages)
