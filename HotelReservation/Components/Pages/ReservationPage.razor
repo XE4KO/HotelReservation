@@ -78,7 +78,7 @@
                     <li class="list-group-item"><strong>Kids:</strong> @kids</li>
                     <li class="list-group-item"><strong>From:</strong> @reservationBegin.ToShortDateString()</li>
                     <li class="list-group-item"><strong>To:</strong> @reservationEnd.ToShortDateString()</li>
-
+                    <li class="list-group-item"><strong>Price:</strong> $@price</li>
                     @if (reservingForSelf)
                     {
                         <li class="list-group-item"><strong>Name:</strong> @userName</li>
@@ -114,6 +114,7 @@
     private int kids;
     private DateTime reservationBegin;
     private DateTime reservationEnd;
+    private int price;
 
     private bool isAuthenticated;
     private bool reservingForSelf = true;
@@ -139,6 +140,7 @@
         kids = int.Parse(query.Get("kids"));
         reservationBegin = DateTime.Parse(query.Get("start"));
         reservationEnd = DateTime.Parse(query.Get("end"));
+        price = int.Parse(query.Get("price"));
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;

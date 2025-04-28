@@ -1,0 +1,93 @@
+﻿@page "/Account/Manage/Reservations"
+@rendermode InteractiveServer
+@using HotelReservation.Components.Models
+@using HotelReservation.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationDbContext DbContext
+
+<h3>My Reservations</h3>
+
+@if (Reservations == null)
+{
+    <p><em>Loading reservations...</em></p>
+}
+else if (Reservations.Count == 0)
+{
+    <p>You have no reservations.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        @foreach (var reservation in Reservations)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Reservation for @reservation.UserName</h5>
+                        <p class="card-text mb-1"><strong>Phone:</strong> @reservation.UserPhone</p>
+                        <p class="card-text mb-1"><strong>Room:</strong> @reservation.Room.Type.Name</p>
+                        <p class="card-text mb-1"><strong>Number:</strong> @($"{reservation.Room.Floor * 100 + reservation.Room.Number}")</p>
+                        <p class="card-text mb-1"><strong>Date:</strong> @reservation.Begin.ToString("dd/MM/yyyy") - @reservation.End.ToString("dd/MM/yyyy")</p>
+                        <p class="card-text mb-1"><strong>Adults:</strong> @reservation.AdultsNumber</p>
+                        <p class="card-text mb-1"><strong>Children:</strong> @reservation.ChildrenNumber</p>
+                        <p class="card-text mb-1"><strong>Price:</strong> $@(reservation.Room.Type.NightlyPrice*(reservation.End-reservation.Begin).TotalDays)</p>
+                        @if (!string.IsNullOrWhiteSpace(reservation.Request))
+                        {
+                            <div class="mb-2">
+                                <strong>Special Request:</strong>
+                                <p>@reservation.Request</p>
+                            </div>
+                        }
+                        <div class="mt-auto">
+                            <button type="button" class="btn btn-danger w-100" @onclick="() => DeleteReservation(reservation.Id)">
+                                Cancel Reservation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Email { get; set; }
+
+    private List<Reservation> Reservations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReservationsAsync();
+    }
+
+    private async Task LoadReservationsAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var appUser = await UserManager.GetUserAsync(user);
+            var currentUserEmail = appUser?.Email;
+            Reservations = await DbContext.Reservations
+                    .Where(r => r.UserEmail == currentUserEmail)
+                    .Include(r => r.Room).ThenInclude(room => room.Type)
+                    .ToListAsync();
+        }
+    }   
+
+    private async Task DeleteReservation(int reservationId)
+    {
+        var reservation = await DbContext.Reservations.FindAsync(reservationId);
+        if (reservation != null)
+        {
+            DbContext.Reservations.Remove(reservation);
+            await DbContext.SaveChangesAsync();
+            await LoadReservationsAsync();
+        }   
+    }
+}

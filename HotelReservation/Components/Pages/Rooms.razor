@@ -61,7 +61,7 @@
                             </div>
                         }
                         <div class="mt-auto">
-                            <button type="button" @onclick="() => SelectRoom(room.Id, adultsFilter, kidsFilter, reservationBegin, reservationEnd)" class="btn btn-success w-100">
+                            <button type="button" @onclick="() => SelectRoom(room.Id, adultsFilter, kidsFilter, reservationBegin, reservationEnd, room.NightlyPrice)" class="btn btn-success w-100">
                                 Reserve Now
                             </button>
                         </div>
@@ -69,8 +69,6 @@
                 </div>
             </div>
         }
-
-
     </div>
 </div>
 
@@ -111,9 +109,9 @@
 		}
 	}
 
-	private void SelectRoom(int roomId, int adults, int kids, DateTime start, DateTime end)
+	private void SelectRoom(int roomId, int adults, int kids, DateTime start, DateTime end, int nightlyPrice)
 	{
-		string url = $"/reservation?room={roomId}&adults={adults}&kids={kids}&start={start:yyyy-MM-dd}&end={end:yyyy-MM-dd}";
+        string url = $"/reservation?room={roomId}&adults={adults}&kids={kids}&start={start:yyyy-MM-dd}&end={end:yyyy-MM-dd}&price={nightlyPrice*(end-start).TotalDays}";
 		Navigation.NavigateTo(url);
 	}
 }
