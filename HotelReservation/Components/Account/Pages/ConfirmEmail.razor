@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using HotelReservation.Data
+@using Microsoft.EntityFrameworkCore
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
@@ -31,6 +32,7 @@
         if (UserId is null || Code is null)
         {
             RedirectManager.RedirectTo("");
+            return;
         }
 
         var user = await UserManager.FindByIdAsync(UserId);
@@ -43,7 +45,25 @@
         {
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
             var result = await UserManager.ConfirmEmailAsync(user, code);
-            statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            if (result.Succeeded)
+            {
+                statusMessage = "Thank you for confirming your email.";
+
+                await AssignRolesIfFirstUserAsync(user);
+            }
+            else
+            {
+                statusMessage = "Error confirming your email.";
+            }
+        }
+    }
+
+    private async Task AssignRolesIfFirstUserAsync(ApplicationUser user)
+    {
+        var totalUsers = await UserManager.Users.CountAsync();
+        if (totalUsers == 1)
+        {   
+            await UserManager.AddToRoleAsync(user, "Admin");
         }
     }
 }

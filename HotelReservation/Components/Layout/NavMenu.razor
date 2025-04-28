@@ -7,7 +7,11 @@
     <div class="nav-links">
         <div><NavLink href="/"><button class="nav-item">Home</button></NavLink></div>
         <div><NavLink href="/rooms"><button class="nav-item">Rooms</button></NavLink></div>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
         <div><NavLink href="/config/templates"><button class="nav-item">Configure Hotel</button></NavLink></div>
+            </Authorized>
+        </AuthorizeView>
         <AuthorizeView>
             <Authorized>
                 <div><NavLink href="/Account/Manage"><button class="nav-item">@context.User.Identity?.Name</button></NavLink></div>

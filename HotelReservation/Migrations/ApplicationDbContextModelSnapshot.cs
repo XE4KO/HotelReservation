@@ -98,7 +98,7 @@ namespace HotelReservation.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TypeId")
+                    b.Property<int>("TypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -400,7 +400,9 @@ namespace HotelReservation.Migrations
                 {
                     b.HasOne("HotelReservation.Components.Models.RoomTemplate", "Type")
                         .WithMany("Rooms")
-                        .HasForeignKey("TypeId");
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Type");
                 });

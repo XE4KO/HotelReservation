@@ -8,6 +8,8 @@
 @inject ApplicationDbContext DbContext;
 @inject IWebHostEnvironment Env
 
+<AuthorizeView Roles="Admin">
+            <Authorized>
 <h3>Images</h3>
 <div class="container row">
     @if (!isLoading)
@@ -36,6 +38,8 @@
         </div>
     }
 </div>
+    </Authorized>
+</AuthorizeView>
 
 @code {
     private Image NewImage() => new Image() { Path = "" };

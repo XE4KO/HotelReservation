@@ -18,8 +18,7 @@
     @if (emailConfirmationLink is not null)
     {
         <div class="alert alert-warning">
-            This app does not currently have a real email sender registered,
-            see <a href="https://aka.ms/aspaccountconf" class="alert-link">these docs</a> for how to configure a real email sender.
+            This app does not currently have a real email sender registered.
             Normally this would be emailed: <a href="@emailConfirmationLink" class="fw-semibold">Click here to confirm your account</a>
         </div>
     }
@@ -57,7 +56,6 @@
         }
         else if (EmailSender is IdentityNoOpEmailSender)
         {
-            // Once you add a real email sender, you should remove this code that lets you confirm the account
             var userId = await UserManager.GetUserIdAsync(user);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

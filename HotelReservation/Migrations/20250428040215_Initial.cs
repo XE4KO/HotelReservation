@@ -279,7 +279,7 @@ namespace HotelReservation.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    TypeId = table.Column<int>(type: "int", nullable: true),
+                    TypeId = table.Column<int>(type: "int", nullable: false),
                     Floor = table.Column<int>(type: "int", nullable: false),
                     Number = table.Column<int>(type: "int", nullable: false)
                 },
@@ -290,7 +290,8 @@ namespace HotelReservation.Migrations
                         name: "FK_Rooms_RoomTemplates_TypeId",
                         column: x => x.TypeId,
                         principalTable: "RoomTemplates",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 

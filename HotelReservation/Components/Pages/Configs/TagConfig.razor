@@ -7,6 +7,8 @@
 @rendermode InteractiveServer
 @inject ApplicationDbContext DbContext;
 
+<AuthorizeView Roles="Admin">
+            <Authorized>
 <div class="mt-4">
     <h3 class="mb-4">Tags</h3>
 
@@ -41,7 +43,8 @@
         <div class="alert alert-info" role="alert">Loading...</div>
     }
 </div>
-
+    </Authorized>
+</AuthorizeView>
 
 @code {
     private Tag NewTag() => new Tag() { Name = "" };

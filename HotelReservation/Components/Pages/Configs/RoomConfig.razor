@@ -7,6 +7,8 @@
 @rendermode InteractiveServer
 @inject ApplicationDbContext DbContext;
 
+<AuthorizeView Roles="Admin">
+            <Authorized>
 <div class="mt-4">
 	<h3 class="mb-4">Rooms</h3>
 
@@ -86,7 +88,8 @@
 		}
 	</div>
 </div>
-
+	</Authorized>
+</AuthorizeView>
 
 @code {
 	private bool editingRoom;
